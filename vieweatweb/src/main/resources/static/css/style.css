@@ -1,0 +1,199 @@
+:root {
+  --primary: #FF6B35; /* Appetizing Orange */
+  --dark: #1A1A1A;    /* Professional Black/Charcoal */
+  --light: #F8F9FA;   /* Clean Off-white */
+  --gray: #666;
+  --font-head: 'Playfair Display', serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+/* 1. GLOBAL RESETS */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-body);
+  background-color: #fff;
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+/* 2. HEADER */
+header {
+  position: absolute; /* Floats on top of Hero */
+  width: 100%;
+  padding: 2rem 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.logo {
+  font-family: var(--font-head);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff; /* White to sit on dark hero */
+}
+.logo .dot { color: var(--primary); }
+
+.btn-glass {
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn-glass:hover { background: #fff; color: var(--dark); }
+
+/* 3. HERO SECTION */
+.hero {
+  height: 80vh; /* Takes up 80% of screen height */
+  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), 
+              url('https://images.unsplash.com/photo-1543353071-87d364289d3e?auto=format&fit=crop&q=80');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+}
+
+.hero-content h1 {
+  font-family: var(--font-head);
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.profile-pic img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  margin-bottom: 1rem;
+  object-fit: cover;
+}
+
+.btn-white {
+  background: #fff;
+  color: var(--dark);
+  border: none;
+  padding: 12px 25px;
+  border-radius: 50px;
+  font-weight: 600;
+  margin: 0 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.btn-white:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+/* 4. SECTIONS & LAYOUT */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+.section-padding { padding-top: 4rem; padding-bottom: 4rem; }
+.section-title {
+  font-family: var(--font-head);
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+/* 5. REVIEW CARDS (THE IMPORTANT PART) */
+.review-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Responsive Grid */
+  gap: 30px;
+}
+
+.review-card {
+  background: #fff;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease;
+  border: 1px solid #eee;
+}
+
+.review-card:hover { transform: translateY(-10px); }
+
+.card-image {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.rating-badge {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background: #fff;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.card-details { padding: 20px; }
+
+.category-tag {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray);
+}
+
+.card-details h3 {
+  font-family: var(--font-head);
+  font-size: 1.5rem;
+  margin: 10px 0;
+}
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+.read-more {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* 6. CATEGORIES */
+.category-scroller {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.cat-bubble {
+  width: 100px;
+  height: 100px;
+  background: #fff;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: 0.3s;
+}
+.cat-bubble:hover { background: var(--primary); color: #fff; transform: scale(1.1); }
+.cat-bubble i { font-size: 1.5rem; margin-bottom: 5px; }
+
+/* 7. FOOTER */
+footer {
+  background: var(--dark);
+  color: #fff;
+  padding: 3rem 0;
+  text-align: center;
+  margin-top: 4rem;
+}
