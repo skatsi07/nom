@@ -2,108 +2,191 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Let's Eat...</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <title>Let's Eat</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <style>
+    /* --- CSS STYLES --- */
+    :root {
+      --bg-gray: #EBEDF0;
+      --app-white: #FFFFFF;
+      --text-dark: #262626;
+      --brand-gradient: linear-gradient(45deg, #FF416C, #FF4B2B);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-gray);
+      font-family: 'Inter', sans-serif;
+      color: var(--text-dark);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    /* THE PHONE CONTAINER */
+    .app-wrapper {
+      background-color: var(--app-white);
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      position: relative;
+      box-shadow: 0 0 30px rgba(0,0,0,0.15);
+      padding-bottom: 80px;
+    }
+
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(5px);
+      padding: 15px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    .logo { font-weight: 800; font-size: 1.2rem; }
+    .btn-dark {
+      background: #000; color: #fff; border: none;
+      padding: 6px 14px; border-radius: 20px; font-weight: 600; cursor: pointer;
+    }
+
+    /* HERO SECTION */
+    .hero { position: relative; margin-bottom: 20px; }
+    .cover-photo { height: 120px; background: var(--brand-gradient); }
+    .profile-info { padding: 0 20px; margin-top: -40px; }
+    .profile-pic {
+      width: 80px; height: 80px; background: #fff;
+      border-radius: 50%; padding: 4px; margin-bottom: 10px;
+    }
+    .profile-pic span {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; height: 100%; background: #333; color: #fff;
+      border-radius: 50%;
+    }
+    .social-buttons { margin-top: 15px; display: flex; gap: 10px; }
+    .btn-social {
+      flex: 1; padding: 8px 0; border: 1px solid #ddd;
+      background: #fff; border-radius: 6px; cursor: pointer;
+    }
+
+    /* SECTIONS */
+    .container { padding: 0 20px; margin-bottom: 30px; }
+    h2 { font-size: 1rem; font-weight: 800; margin-bottom: 15px; }
+
+    /* --- THE ANIMATION MAGIC IS HERE --- */
+    .category-grid {
+      display: flex; gap: 15px;
+      overflow-x: auto; padding: 10px 5px;
+      scrollbar-width: none;
+    }
+    .category-grid::-webkit-scrollbar { display: none; }
+
+    .cat-box {
+      min-width: 70px; height: 70px;
+      border-radius: 50%;
+      /* Gradient Ring like Instagram */
+      background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); 
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 1.8rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      
+      /* THIS CREATES THE BOUNCY ANIMATION */
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    /* HOVER STATE */
+    .cat-box:hover {
+      transform: scale(1.15) rotate(5deg); /* Scale up and tilt slightly */
+      box-shadow: 0 10px 25px rgba(220, 39, 67, 0.4); /* Colored glow */
+    }
+
+    /* MAP & FOOTER */
+    .map-placeholder {
+      background: #f0f2f5; height: 150px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; color: #888;
+    }
+    footer {
+      position: absolute; bottom: 0; width: 100%;
+      background: #fff; border-top: 1px solid #eee; padding: 15px 0;
+    }
+    .footer-links {
+      display: flex; justify-content: space-around; font-size: 1.4rem; color: #262626;
+    }
+  </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">Let's Eat...</div>
-  <div class="nav-buttons">
-    <button class="btn-dark">Past Reviews</button>
-  </div>
-</header>
+<div class="app-wrapper">
 
-<section class="hero">
-  <div class="profile-pic">
-    <span>Photo of Me</span>
-  </div>
-  <div class="social-buttons">
-    <button class="btn-black">Instagram</button>
-    <button class="btn-black">TikTok</button>
-  </div>
-</section>
-
-<section class="container">
-  <h2>Most Recent Eats</h2>
-  <div class="review-list">
-    <div class="review-row" th:each="review : ${reviews}">
-      <span class="place-name" th:text="${review.placeName}">Place Name</span>
-      <span class="stars">
-                    <span th:each="i : ${#numbers.sequence(1, review.overallRating)}" style="color: #e5c100;">*</span>
-                </span>
-      <span class="date" th:text="${review.date}">12/12/2025</span>
-    </div>
-  </div>
-</section>
-
-<section class="container">
-  <h2>Explore Reviews by Category</h2>
-  <div class="category-grid">
-    <div class="cat-box"></div> <div class="cat-box"></div> <div class="cat-box"></div>
-    <div class="cat-box"></div> <div class="cat-box"></div>
-    <div class="cat-box"></div> <div class="cat-box"></div> <div class="cat-box"></div>
-    <div class="cat-box"></div> <div class="cat-box"></div>
-  </div>
-</section>
-
-<section class="container">
-  <h2>Food Map</h2>
-  <div class="map-placeholder">
-    <p>Interactive Map</p>
-  </div>
-</section>
-
-<section class="container">
-  <h2>Quick Links</h2>
-  <div class="quick-links-grid">
-    <div class="link-card">
-      <h3>CHICKEN</h3>
-      <div class="card-content">
-        <div class="avatar small"></div>
-        <div>
-          <strong>Instagram</strong><br><small>Reel</small>
-        </div>
+    <header>
+      <div class="logo">Let's Eat...</div>
+      <div class="nav-buttons">
+        <button class="btn-dark">Past Reviews</button>
       </div>
-    </div>
-    <div class="link-card">
-      <h3>MANGIAIIIIII</h3>
-      <div class="card-content">
-        <div class="avatar small"></div>
-        <div>
-          <strong>Instagram</strong><br><small>Reel</small>
-        </div>
-      </div>
-    </div>
-    <div class="link-card">
-      <h3>EATING</h3>
-      <div class="card-content">
-        <div class="avatar small"></div>
-        <div>
-          <strong>TikTok</strong><br><small>Video</small>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+    </header>
 
-<footer>
-  <div class="footer-left">
-    <h3>Contact Me...</h3>
-    <div class="social-icons">
-      <i class="fab fa-facebook"></i>
-      <i class="fab fa-linkedin"></i>
-      <i class="fab fa-youtube"></i>
-      <i class="fab fa-instagram"></i>
-    </div>
-  </div>
-  <div class="footer-links">
-    <div class="col"><strong>Topic</strong><br>Page<br>Page<br>Page</div>
-    <div class="col"><strong>Topic</strong><br>Page<br>Page<br>Page</div>
-    <div class="col"><strong>Topic</strong><br>Page<br>Page<br>Page</div>
-  </div>
-</footer>
+    <section class="hero">
+      <div class="cover-photo"></div>
+      <div class="profile-info">
+          <div class="profile-pic"><span>Me</span></div>
+          <div>
+            <h1>Simon Katsiamakis <i class="fas fa-check-circle" style="color:#1DA1F2"></i></h1>
+          </div>
+          <div class="social-buttons">
+            <button class="btn-social">Instagram</button>
+            <button class="btn-social">TikTok</button>
+          </div>
+      </div>
+    </section>
+
+    <section class="container">
+      <h2>Recent Eats</h2>
+      <div th:each="review : ${reviews}" 
+          style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee;">
+        <strong th:text="${review.placeName}" style="flex: 1; text-align: left;">Place</strong> 
+        <div style="flex: 1; text-align: left; padding-left: 10px;">
+            <span th:each="i : ${#numbers.sequence(1, review.overallRating)}" style="color: #e5c100;">★</span>
+        </div>
+        <span class="date" th:text="${review.date}" style="flex: 1; text-align: right; color: #888;">12/12/2025</span>       
+      </div>
+    </section>
+
+    <section class="container">
+      <h2>Explore Cravings</h2>
+      <div class="category-grid">
+        <div class="cat-box">🍕</div>
+        <div class="cat-box">🍔</div>
+        <div class="cat-box">🍜</div>
+        <div class="cat-box">🍣</div>
+        <div class="cat-box">🥩</div>
+        <div class="cat-box">🌮</div>
+        <div class="cat-box">🥗</div>
+      </div>
+    </section>
+
+    <section class="container">
+      <h2>Food Map</h2>
+      <div class="map-placeholder">
+        <p>Interactive Map</p>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-links">
+        <i class="fas fa-home"></i>
+        <i class="fas fa-search"></i>
+        <i class="far fa-plus-square"></i>
+        <i class="far fa-heart"></i>
+        <i class="far fa-user"></i>
+      </div>
+    </footer>
+
+</div>
 
 </body>
 </html>

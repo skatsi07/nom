@@ -1,199 +1,497 @@
+/* --- BASE STYLES (Mobile First) --- */
 :root {
-  --primary: #FF6B35; /* Appetizing Orange */
-  --dark: #1A1A1A;    /* Professional Black/Charcoal */
-  --light: #F8F9FA;   /* Clean Off-white */
-  --gray: #666;
-  --font-head: 'Playfair Display', serif;
-  --font-body: 'Inter', sans-serif;
+  --bg-gray: #FAFAFA;
+  --app-white: #FFFFFF;
+  --text-dark: #262626;
+  --border: #DBDBDB;
+  --brand-gradient: linear-gradient(45deg, #FF416C, #FF4B2B);
 }
 
-/* 1. GLOBAL RESETS */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: var(--font-body);
-  background-color: #fff;
-  color: var(--dark);
-  line-height: 1.6;
+  background-color: var(--bg-gray);
+  font-family: 'Inter', sans-serif;
+  color: var(--text-dark);
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
 }
 
-/* 2. HEADER */
-header {
-  position: absolute; /* Floats on top of Hero */
+/* MAIN WRAPPER - Defaults to Mobile Look */
+.app-wrapper {
+  background-color: var(--app-white);
   width: 100%;
-  padding: 2rem 5%;
+  max-width: 480px; /* Standard phone width */
+  position: relative;
+  box-shadow: 0 0 30px rgba(0,0,0,0.05);
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+/* HEADER */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  padding: 15px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+.logo { font-weight: 800; font-size: 1.2rem; }
+.btn-dark { background: #000; color: #fff; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+
+/* PROFILE SECTION */
+.hero { position: relative; margin-bottom: 20px; text-align: center; }
+.cover-photo {
+  height: 120px;
+  background: var(--brand-gradient);
+  /* Top-left, Top-right, Bottom-right, Bottom-left */
+  border-radius: 20px 20px 0 0;
+}
+.profile-info { padding: 0 20px; margin-top: -50px; }
+.profile-pic {
+  width: 100px; height: 100px; background: #fff;
+  border-radius: 50%; padding: 4px; margin: 0 auto 10px;
+}
+.profile-pic span {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%; background: #333; color: #fff; border-radius: 50%;
+}
+.social-buttons { margin-top: 15px; display: flex; gap: 10px; justify-content: center; }
+.btn-social {
+  padding: 8px 16px; border: 1px solid var(--border);
+  background: #fff; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem;
+}
+
+/* SECTIONS */
+.container { padding: 0 20px; margin-bottom: 30px; }
+h2 { font-size: 1rem; font-weight: 800; margin-bottom: 15px; }
+
+/* REVIEWS */
+.review-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 15px 0; border-bottom: 1px solid #eee;
+}
+.place-name { flex: 1; text-align: left; font-size: 0.95rem; }
+.star-group { flex: 1; text-align: left; padding-left: 10px; }
+.date { flex: 1; text-align: right; color: #888; font-size: 0.85rem; }
+
+/* --- ANIMATED REVIEW ROWS --- */
+.review-row {
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border-radius: 12px; /* Smooth corners for the hover effect */
+  padding: 15px; /* Ensure there is space for the background */
+  border-bottom: 1px solid #eee; /* Keep existing separator */
+}
+
+.review-row:hover {
+  background-color: #fff; /* Make it white so shadow shows */
+  transform: scale(1.02); /* Slight zoom instead of huge lift */
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08); /* Soft shadow */
+  border-bottom: 1px solid transparent; /* Hide separator on hover */
+  z-index: 10; /* Bring to front */
+}
+
+/* CATEGORIES (SCROLLABLE) */
+.category-grid {
+  display: flex; gap: 15px; overflow-x: auto; padding: 10px 5px; scrollbar-width: none;
+}
+.category-grid::-webkit-scrollbar { display: none; }
+
+.cat-box {
+  min-width: 70px; height: 70px; border-radius: 50%;
+  background: linear-gradient(45deg, #f09433, #bc1888); 
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 1.8rem; cursor: pointer; flex-shrink: 0;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.cat-box:hover { transform: scale(1.15) rotate(5deg); }
+
+/* MAP */
+.map-placeholder {
+  background: #f0f2f5; height: 200px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; color: #888;
+}
+
+
+/* =========================================
+   DESKTOP OPTIMIZATION (CENTERED STACK)
+   ========================================= */
+@media (min-width: 900px) {
+  
+  /* 1. Reset wrapper to be flexible */
+  .app-wrapper {
+    max-width: 1000px; /* Allow total width to be larger */
+    background: transparent; 
+    box-shadow: none;
+    margin-top: 40px;
+    height: auto;
+    min-height: auto;
+    overflow: visible; 
+  }
+
+  /* 2. Vertical Stack Layout */
+  .layout-grid {
+    display: flex;           /* Stack items vertically */
+    flex-direction: column; 
+    align-items: center;     /* Center everything */
+    gap: 30px;               /* Space between Profile and Content */
+  }
+
+  /* 3. The Top Profile Card */
+  .topbar {
+    width: 100%;
+    max-width: 500px; /* Keep profile narrow/compact */
+    margin: 0 auto; 
+  }
+  
+  .profile-card {
+    background: #fff;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    padding-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  /* 4. The Bottom Content (Wider) */
+  .main-content {
+    width: 100%;
+    max-width: 800px; /* WIDER than the profile (as requested) */
+    background: #fff;
+    border-radius: 15px;
+    border: 1px solid var(--border);
+    padding: 40px;    /* More padding for desktop look */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    min-height: 80vh;
+    margin: 0 auto;
+  }
+
+  /* Hide mobile header */
+  header { display: none; } 
+}
+
+/* VIEW MORE BUTTON CONTAINER */
+.view-more-container {
+  margin-top: 15px;
+  text-align: center;
+}
+
+/* THE BUTTON STYLE */
+.btn-outline {
+  display: block;
+  width: 100%;
+  padding: 12px 0;
+  border: 1px solid #ddd;
+  background-color: transparent;
+  color: var(--text-dark);
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  background-color: #f5f5f5;
+  border-color: #ccc;
+  transform: translateY(-2px); /* Slight lift effect */
+}
+
+/* Make sure the header link looks like a button */
+.btn-dark {
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* =========================================
+   ALL REVIEWS PAGE STYLES
+   ========================================= */
+
+/* Header back button icon */
+.btn-icon {
+  color: var(--text-dark);
+  font-size: 1.2rem;
+  text-decoration: none;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
+  height: 40px; width: 40px;
+}
+
+/* Adjust main container padding for this page */
+.main-content.full-width { padding: 20px 0; }
+
+/* --- SEARCH BAR --- */
+.search-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+.search-input {
+  width: 100%;
+  padding: 12px 15px 12px 40px; /* Padding left for the icon */
+  border-radius: 25px; /* Fully rounded corners */
+  border: none;
+  background: #EFEFEF; /* Light gray background */
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+}
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+}
+
+/* --- FILTER BUTTONS --- */
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  overflow-x: auto; /* Allows side-scrolling on mobile */
+  padding-bottom: 5px;
+  scrollbar-width: none; /* Hide scrollbar */
+}
+.filter-buttons::-webkit-scrollbar { display: none; }
+
+.btn-filter {
+  background: #EFEFEF;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: var(--text-dark);
+  cursor: pointer;
+  white-space: nowrap; /* Prevents text wrapping */
+  transition: background 0.2s;
+}
+.btn-filter:hover { background: #e0e0e0; }
+
+.sort-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #E0E0E0; /* Slightly darker for emphasis */
+}
+
+/* --- REVIEW GRID (Mobile First: 1 Column) --- */
+.review-grid-cards {
+  display: grid;
+  grid-template-columns: 1fr; /* Single column on phone */
+  gap: 25px;
+}
+
+/* Review Card Style */
+.review-card-large {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* The tall image placeholder */
+.card-image-placeholder {
+  aspect-ratio: 4 / 5; /* Creates the tall, portrait shape */
+  background: #E0E0E0;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #A0A0A0;
+  font-size: 3rem;
+}
+
+.card-info h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+
+/* =========================================
+   DESKTOP OPTIMIZATION (min-width: 900px)
+   ========================================= */
+@media (min-width: 900px) {
+  
+  /* 1. Switch Grid to 3 Columns (like the reference image) */
+  .review-grid-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+  }
+  
+  /* 2. Center and limit width of Search & Filters */
+  .search-container, .filter-buttons {
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  /* 3. Disable horizontal scrolling for filters on desktop */
+  .filter-buttons {
+    overflow-x: visible;
+  }
+}
+
+/* =========================================
+   MODAL (POP-UP) STYLES
+   ========================================= */
+
+/* The Dark Overlay Background */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6); /* Dark semi-transparent */
+  backdrop-filter: blur(5px);
+  z-index: 2000;
+  display: none; /* Hidden by default */
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-overlay.active { display: flex; }
+
+/* The White Box */
+.modal-content {
+  background: white;
+  width: 100%;
+  max-width: 900px; /* Wide format for 2 columns */
+  max-height: 90vh; /* Don't go taller than screen */
+  overflow-y: auto; /* Scroll if content is long */
+  border-radius: 20px;
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+/* Close Button (Top Right) */
+.modal-close-btn {
+  position: absolute;
+  top: 15px; right: 20px;
+  font-size: 2rem;
+  background: none; border: none;
+  cursor: pointer; color: #888;
   z-index: 10;
 }
 
-.logo {
-  font-family: var(--font-head);
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #fff; /* White to sit on dark hero */
-}
-.logo .dot { color: var(--primary); }
-
-.btn-glass {
-  background: rgba(255,255,255,0.2);
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(255,255,255,0.4);
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-.btn-glass:hover { background: #fff; color: var(--dark); }
-
-/* 3. HERO SECTION */
-.hero {
-  height: 80vh; /* Takes up 80% of screen height */
-  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), 
-              url('https://images.unsplash.com/photo-1543353071-87d364289d3e?auto=format&fit=crop&q=80');
-  background-size: cover;
-  background-position: center;
+/* Modal Body Layout */
+.modal-body {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  color: white;
+  flex-direction: column; /* Mobile Default: Stacked */
 }
 
-.hero-content h1 {
-  font-family: var(--font-head);
-  font-size: 4rem;
-  margin-bottom: 1rem;
+/* Left Column (Details) */
+.modal-left {
+  padding: 30px;
+  flex: 1;
 }
 
-.profile-pic img {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  border: 3px solid #fff;
-  margin-bottom: 1rem;
-  object-fit: cover;
+/* Right Column (Images) */
+.modal-right {
+  background: #f0f0f0;
+  min-height: 250px;
+  display: flex; align-items: center; justify-content: center;
+  color: #888;
 }
 
-.btn-white {
-  background: #fff;
-  color: var(--dark);
-  border: none;
-  padding: 12px 25px;
-  border-radius: 50px;
-  font-weight: 600;
-  margin: 0 10px;
-  cursor: pointer;
-  transition: transform 0.2s;
+/* --- TYPOGRAPHY & ELEMENTS --- */
+.modal-header-row {
+  display: flex; justify-content: space-between; align-items: start;
 }
-.btn-white:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+.modal-header-row h2 {
+  font-size: 1.8rem; margin: 0;
+}
+.modal-stars-large { font-size: 1.5rem; }
 
-/* 4. SECTIONS & LAYOUT */
-.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-.section-padding { padding-top: 4rem; padding-bottom: 4rem; }
-.section-title {
-  font-family: var(--font-head);
-  font-size: 2.5rem;
-  margin-bottom: 2rem;
-  text-align: center;
+.modal-subtitle {
+  color: #888; margin-top: 5px; font-size: 0.9rem;
 }
 
-/* 5. REVIEW CARDS (THE IMPORTANT PART) */
-.review-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Responsive Grid */
-  gap: 30px;
+.modal-divider {
+  border: 0; border-top: 1px solid #eee;
+  margin: 20px 0;
 }
 
-.review-card {
-  background: #fff;
-  border-radius: 15px;
-  overflow: hidden;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-  transition: transform 0.3s ease;
+/* Meta Data Grid */
+.modal-meta-grid {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.meta-row { font-size: 0.95rem; }
+.description-box { margin-top: 10px; line-height: 1.5; color: #555; }
+
+/* Rating Breakdown */
+.rating-row {
+  display: flex; justify-content: space-between;
+  margin-bottom: 8px; font-weight: 500;
+}
+
+/* Quick Links */
+.quick-links-row {
+  display: flex; gap: 15px;
+  margin-top: 5px;
+}
+.video-link-card {
   border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 10px 15px;
+  display: flex; align-items: center; gap: 10px;
+  flex: 1; cursor: pointer;
+  transition: background 0.2s;
+  text-decoration: none; /* Removes underline from links */
+  color: inherit; /* Keeps text color normal */
+}
+.video-link-card:hover { background: #f9f9f9; }
+
+.video-icon {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 1.2rem;
+}
+.video-icon.instagram { background: linear-gradient(45deg, #f09433, #bc1888); }
+.video-icon.tiktok { background: #000; }
+
+
+/* =========================================
+   DESKTOP MODAL LAYOUT
+   ========================================= */
+@media (min-width: 768px) {
+  .modal-body {
+    flex-direction: row; /* Split into 2 columns */
+  }
+  .modal-left { width: 50%; }
+  .modal-right { width: 50%; min-height: auto; }
+  
+  .modal-image-placeholder {
+    width: 80%; height: 80%;
+    background: #e0e0e0;
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+  }
 }
 
-.review-card:hover { transform: translateY(-10px); }
+/* --- ANIMATED REVIEW TILES --- */
 
-.card-image {
-  height: 200px;
-  background-size: cover;
-  background-position: center;
-  position: relative;
+.review-card-large {
+  /* Make the movement smooth */
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer; /* Changes mouse to a hand icon */
+  
+  /* Optional: Add some padding so they don't touch when moving */
+  padding: 10px; 
+  border-radius: 15px;
 }
 
-.rating-badge {
-  position: absolute;
-  bottom: 15px;
-  right: 15px;
-  background: #fff;
-  padding: 5px 12px;
-  border-radius: 8px;
-  font-weight: 800;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+/* The Hover State (What happens when mouse is over it) */
+.review-card-large:hover {
+  /* 1. Move Up */
+  transform: translateY(-10px); 
+  
+  /* 2. Add a soft shadow to make it look like it's floating */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  
+  /* 3. (Optional) Highlight background slightly */
+  background-color: #fafafa;
 }
 
-.card-details { padding: 20px; }
-
-.category-tag {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--gray);
-}
-
-.card-details h3 {
-  font-family: var(--font-head);
-  font-size: 1.5rem;
-  margin: 10px 0;
-}
-
-.card-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 15px;
-  font-size: 0.9rem;
-  color: var(--gray);
-}
-
-.read-more {
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-/* 6. CATEGORIES */
-.category-scroller {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.cat-bubble {
-  width: 100px;
-  height: 100px;
-  background: #fff;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-  cursor: pointer;
-  transition: 0.3s;
-}
-.cat-bubble:hover { background: var(--primary); color: #fff; transform: scale(1.1); }
-.cat-bubble i { font-size: 1.5rem; margin-bottom: 5px; }
-
-/* 7. FOOTER */
-footer {
-  background: var(--dark);
-  color: #fff;
-  padding: 3rem 0;
-  text-align: center;
-  margin-top: 4rem;
-}

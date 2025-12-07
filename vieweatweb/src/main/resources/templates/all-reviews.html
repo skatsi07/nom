@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>All Reviews</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="app-wrapper">
+
+    <header>
+      <div class="nav-buttons">
+        <a th:href="@{/}" class="btn-icon"><i class="fas fa-arrow-left"></i></a>
+      </div>
+      <div class="logo" style="font-size: 1.1rem;">Search Past Reviews</div>
+      <div style="width: 40px;"></div>
+    </header>
+
+    <div class="centered-layout">
+
+        <aside class="topbar">
+            <section class="hero profile-card">
+              <div class="cover-photo"></div>
+              <div class="profile-info">
+                  <div class="profile-pic"><span>Me</span></div>
+                  <h1>Simon Katsiamakis</h1>
+                  <h2>@skatsi07</h2>
+                  
+                  <div class="social-buttons" style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;">
+                      <div style="display: flex; gap: 10px; justify-content: center; width: 100%; margin-bottom: 8px;">
+                          <button class="btn-social"><i class="fab fa-instagram"></i> Instagram</button>
+                          <button class="btn-social"><i class="fab fa-tiktok"></i> TikTok</button>
+                      </div>
+                      <a th:href="@{/}" class="btn-dark" style="width: 100%; display: block; text-align: center; text-decoration: none;">
+                          <i class="fas fa-arrow-left"></i> Back to Profile
+                      </a>
+                  </div>
+              </div>
+            </section>
+        </aside>
+
+        <main class="main-content full-width" style="box-shadow: none; border: none;">
+            
+            <section class="container">
+              
+              <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search reviews...">
+              </div>
+
+              <div class="filter-buttons">
+                <button class="btn-filter">Cuisine</button>
+                <button class="btn-filter">Date</button>
+                <button class="btn-filter">Stars</button>
+                <button class="btn-filter">Price</button>
+                <div style="flex: 1;"></div>
+                <button class="btn-filter sort-btn">Sort <i class="fas fa-chevron-down"></i></button>
+              </div>
+
+              <div class="review-grid-cards">
+                
+                <div th:each="review : ${reviews}" class="review-card-large" 
+                     onclick="openModal(this)"
+                     th:data-place="${review.placeName}"
+                     th:data-date="${review.date}"
+                     th:data-rating="${review.overallRating}"
+                     th:data-cuisine="${review.cuisine}"
+                     th:data-price="${review.pricePerPerson}"
+                     th:data-desc="${review.overallDesc}"
+                     th:data-food="${review.foodScore}"
+                     th:data-service="${review.serviceScore}"
+                     th:data-ambiance="${review.ambianceScore}"
+                     th:data-insta="${review.instagramUrl}"
+                     th:data-tiktok="${review.tiktokUrl}">
+                     
+                  <div class="card-image-placeholder">
+                    <i class="fas fa-utensils"></i>
+                  </div>
+                  <div class="card-info">
+                    <h3 th:text="${review.placeName}">Place</h3>
+                    <div class="stars">
+                        <span th:each="i : ${#numbers.sequence(1, review.overallRating)}" style="color: #e5c100;">★</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              
+            </section>
+
+        </main>
+    </div>
+
+</div>
+
+<div id="reviewModal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        
+        <button class="modal-close-btn" onclick="closeModal()">&times;</button>
+
+        <div class="modal-body">
+            
+            <div class="modal-left">
+                <div class="modal-header-row">
+                    <h2 id="m-place">Place Name</h2>
+                    <div id="m-main-stars" class="modal-stars-large"></div>
+                </div>
+                <p class="modal-subtitle">Location Data Placeholder</p>
+
+                <hr class="modal-divider">
+
+                <div class="modal-meta-grid">
+                    <div class="meta-row" id="row-date"><strong>Date Visited:</strong> <span id="m-date"></span></div>
+                    <div class="meta-row" id="row-cuisine"><strong>Cuisine:</strong> <span id="m-cuisine"></span></div>
+                    <div class="meta-row" id="row-price"><strong>Price:</strong> $<span id="m-price"></span></div>
+                    <div class="meta-row description-box" id="row-desc"><strong>Description:</strong> <p id="m-desc"></p></div>
+                </div>
+
+                <hr class="modal-divider">
+
+                <h3>Rating Breakdown</h3>
+                <div class="rating-breakdown">
+                    <div class="rating-row" id="row-rating-food"><span>Food</span> <div class="stars-right" id="stars-food"></div></div>
+                    <div class="rating-row" id="row-rating-service"><span>Service</span> <div class="stars-right" id="stars-service"></div></div>
+                    <div class="rating-row" id="row-rating-ambiance"><span>Ambiance</span> <div class="stars-right" id="stars-ambiance"></div></div>
+                    <div class="rating-row"><span>Overall</span> <div class="stars-right" id="stars-overall"></div></div>
+                </div>
+
+                <div id="link-section">
+                    <hr class="modal-divider">
+                    <h3>Quick Links to Videos</h3>
+                    <div class="quick-links-row">
+                        
+                        <a id="link-insta" href="#" target="_blank" class="video-link-card">
+                            <div class="video-icon instagram"><i class="fab fa-instagram"></i></div>
+                            <div><strong>Instagram</strong><br><small>Reel</small></div>
+                        </a>
+
+                        <a id="link-tiktok" href="#" target="_blank" class="video-link-card">
+                            <div class="video-icon tiktok"><i class="fab fa-tiktok"></i></div>
+                            <div><strong>Tik Tok</strong><br><small>Video</small></div>
+                        </a>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-right">
+                <div class="modal-image-placeholder"><p>Photo Gallery</p></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal(card) {
+        const d = card.dataset;
+
+        // 1. Basic Fields
+        document.getElementById('m-place').innerText = d.place;
+        updateField('row-date', 'm-date', d.date);
+        updateField('row-cuisine', 'm-cuisine', d.cuisine);
+        updateField('row-price', 'm-price', d.price);
+        updateField('row-desc', 'm-desc', d.desc);
+
+        // 2. Stars
+        renderStars('m-main-stars', d.rating);
+        renderStars('stars-overall', d.rating);
+        updateRatingRow('row-rating-food', 'stars-food', d.food);
+        updateRatingRow('row-rating-service', 'stars-service', d.service);
+        updateRatingRow('row-rating-ambiance', 'stars-ambiance', d.ambiance);
+
+        // 3. Logic for Video Links (NEW)
+        const instaBtn = document.getElementById('link-insta');
+        const tiktokBtn = document.getElementById('link-tiktok');
+        const section = document.getElementById('link-section');
+        let hasAnyLink = false;
+
+        // Check Instagram
+        if (d.insta && d.insta !== 'null' && d.insta !== '') {
+            instaBtn.style.display = 'flex';
+            instaBtn.href = d.insta;
+            hasAnyLink = true;
+        } else {
+            instaBtn.style.display = 'none';
+        }
+
+        // Check TikTok
+        if (d.tiktok && d.tiktok !== 'null' && d.tiktok !== '') {
+            tiktokBtn.style.display = 'flex';
+            tiktokBtn.href = d.tiktok;
+            hasAnyLink = true;
+        } else {
+            tiktokBtn.style.display = 'none';
+        }
+
+        // Hide entire section if NO links exist
+        if (hasAnyLink) {
+            section.style.display = 'block';
+        } else {
+            section.style.display = 'none';
+        }
+
+        document.getElementById('reviewModal').classList.add('active');
+    }
+
+    function closeModal(event) {
+        document.getElementById('reviewModal').classList.remove('active');
+    }
+
+    function updateField(rowId, textId, value) {
+        const row = document.getElementById(rowId);
+        if (!value || value === 'null') {
+            row.style.display = 'none';
+        } else {
+            row.style.display = 'block';
+            document.getElementById(textId).innerText = value;
+        }
+    }
+
+    function updateRatingRow(rowId, starContainerId, value) {
+        const row = document.getElementById(rowId);
+        if (!value || value === 'null' || value == 0) {
+            row.style.display = 'none';
+        } else {
+            row.style.display = 'flex';
+            renderStars(starContainerId, value);
+        }
+    }
+
+    function renderStars(containerId, count) {
+        let html = '';
+        for(let i=0; i<count; i++) {
+            html += '<i class="fas fa-star" style="color: #e5c100; margin-right: 2px;"></i>';
+        }
+        document.getElementById(containerId).innerHTML = html;
+    }
+</script>
+
+</body>
+</html>

@@ -32,6 +32,8 @@ public class Review {
     private Float pricePerPerson;
     private String cuisine;
     private String overallDesc;
+    private String instagramUrl;
+    private String tiktokUrl;
 
     // --- 3. OPTIONAL SCORES ---
     private Integer foodScore;
