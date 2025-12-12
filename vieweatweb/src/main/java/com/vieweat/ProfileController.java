@@ -19,9 +19,16 @@ public class ProfileController {
   // --- 1. HOME PAGE (Recent 5 Reviews) ---
   @GetMapping("/")
   public String home(Model model) {
-    List<Review> myReviews = reviewRepository.findTop5ByOrderByDateDesc();
-    model.addAttribute("reviews", myReviews);
-    return "profile";
+      // 1. Fetch YOUR profile info first
+      User myProfile = userRepository.findByUsername("skatsi07");
+
+      // 2. Fetch the reviews specifically linked to YOU
+      List<Review> myReviews = reviewRepository.findTop5ByUserOrderByDateDesc(myProfile);
+      
+      model.addAttribute("reviews", myReviews);
+      model.addAttribute("user", myProfile);
+      
+      return "profile";
   }
 
   // --- 2. ALL REVIEWS PAGE ---
