@@ -34,9 +34,19 @@ public class ProfileController {
   // --- 2. ALL REVIEWS PAGE ---
   @GetMapping("/reviews")
   public String getAllReviews(Model model) {
-    List<Review> allReviews = reviewRepository.findAll();
-    model.addAttribute("reviews", allReviews);
-    return "all-reviews";
+      
+      // 1. Fetch YOUR profile (So the header knows who you are)
+      User myProfile = userRepository.findByUsername("skatsi07");
+
+      // 2. Fetch ALL reviews specifically linked to YOU
+      // (Using the new method we just created)
+      List<Review> allReviews = reviewRepository.findAllByUserOrderByDateDesc(myProfile);
+
+      // 3. Add data to the model so HTML can use it
+      model.addAttribute("reviews", allReviews);
+      model.addAttribute("user", myProfile); // Passing 'user' makes the header dynamic
+      
+      return "all-reviews";
   }
 
   // --- 3. SHOW THE "ADD REVIEW" FORM ---

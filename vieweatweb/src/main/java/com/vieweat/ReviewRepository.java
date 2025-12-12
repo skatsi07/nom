@@ -7,9 +7,11 @@ import java.util.List;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     
-    // OLD: Finds newest reviews from ANYONE (Delete or ignore this)
-    // List<Review> findTop5ByOrderByDateDesc();
-
-    // NEW: Finds newest reviews specifically for a given User
+    // Used for the Home Page (Limit 5)
     List<Review> findTop5ByUserOrderByDateDesc(User user);
+
+    // --- NEW METHOD ---
+    // Used for the "All Reviews" page. 
+    // Finds EVERYTHING by this user, newest first.
+    List<Review> findAllByUserOrderByDateDesc(User user);
 }
