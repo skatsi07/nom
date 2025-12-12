@@ -1,39 +1,45 @@
 package com.vieweat;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
-@Data 
-@Builder 
-@NoArgsConstructor 
-@AllArgsConstructor 
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Review {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // Every review gets a unique ID
+
+    // --- THE LINK TO THE USER ---
+    @ManyToOne // Many reviews can belong to One user
+    @JoinColumn(name = "user_id", nullable = false) // This creates a "Foreign Key" column in the DB
+    private User user;
+
     // --- 1. MANDATORY FIELDS ---
-    
-    // Primitive 'int' cannot be null, so this is automatically mandatory.
+    @Column(unique = false, nullable = false)
     private int overallRating;
 
-    // Lombok will generate a null-check for these. 
-    // If you try to set these to null, the app will throw a NullPointerException.
-    @NonNull
+    @Column(unique = false, nullable = false)
     private String placeName;
     
-    @NonNull
+    @Column(unique = false, nullable = false)
     private String date;
 
     // --- 2. OPTIONAL FIELDS ---
     private Float pricePerPerson;
     private String cuisine;
-    private String overallDesc;
     private String instagramUrl;
     private String tiktokUrl;
+    
+    @Column(columnDefinition = "TEXT")
+    private String overallDesc;
 
     // --- 3. OPTIONAL SCORES ---
     private Integer foodScore;
@@ -42,5 +48,6 @@ public class Review {
 
     // --- 4. LIST ---
     @Builder.Default 
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
     private List<FoodItem> foodItems = new ArrayList<>();
 }
