@@ -90,9 +90,8 @@
                   </div>
                   <div class="card-info">
                     <h3 th:text="${review.placeName}">Place</h3>
-                    <div class="stars">
-                        <span th:each="i : ${#numbers.sequence(1, review.overallRating)}" style="color: #e5c100;">★</span>
-                    </div>
+                    <div class="star-group" th:data-score="${review.overallRating}">
+                        </div>
                   </div>
                 </div>
 
@@ -242,12 +241,61 @@
         }
     }
 
-    function renderStars(containerId, count) {
+    function renderStars(containerId, rawScore) {
+        // Convert 0-10 input to 0-5 output
+        if (!rawScore) return;
+        
+        const score5 = rawScore / 2;
+        
         let html = '';
-        for(let i=0; i<count; i++) {
+        const fullStars = Math.floor(score5);
+        const hasHalf = (score5 - fullStars) >= 0.5;
+
+        for(let i=0; i<fullStars; i++) {
             html += '<i class="fas fa-star" style="color: #e5c100; margin-right: 2px;"></i>';
         }
+        if (hasHalf) {
+            html += '<i class="fas fa-star-half-alt" style="color: #e5c100; margin-right: 2px;"></i>';
+        }
+        
+        // Optional: Add the text number for clarity
+        html += `<span style="color:#888; font-size:0.8rem; margin-left:5px;">(${rawScore})</span>`;
+
         document.getElementById(containerId).innerHTML = html;
+    }
+</script>
+
+<script>
+///Gets Stars using 0-10 scale and converts to 0-5 scale
+    // Run this when page loads to draw stars on the cards/rows
+    document.addEventListener("DOMContentLoaded", function() {
+        const starGroups = document.querySelectorAll('.star-group');
+        
+        starGroups.forEach(group => {
+            const score10 = parseFloat(group.getAttribute('data-score')); // e.g. 8.5
+            if (!isNaN(score10)) {
+                const score5 = score10 / 2; // Convert to 0-5 scale (e.g. 4.25)
+                group.innerHTML = generateStarHTML(score5);
+            }
+        });
+    });
+
+    // Helper to generate star icons
+    function generateStarHTML(rating) {
+        let html = '';
+        const fullStars = Math.floor(rating); // e.g. 4.25 -> 4
+        const hasHalf = (rating - fullStars) >= 0.5; // Check for half star
+        
+        // Full Stars
+        for (let i = 0; i < fullStars; i++) {
+            html += '<i class="fas fa-star" style="color: #e5c100;"></i>';
+        }
+        // Half Star (Optional)
+        if (hasHalf) {
+            html += '<i class="fas fa-star-half-alt" style="color: #e5c100;"></i>';
+        }
+        
+        return html;
     }
 </script>
 

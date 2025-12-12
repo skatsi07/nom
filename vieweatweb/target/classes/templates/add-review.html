@@ -23,21 +23,102 @@
         
         <form th:action="@{/add}" th:object="${review}" method="post" style="display: flex; flex-direction: column; gap: 20px;">
             
-            <div class="form-group">
-                <label>Place Name</label>
-                <input type="text" th:field="*{placeName}" required placeholder="e.g. Joe's Pizza" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+            <div style="background: #fff; padding: 5px 0;">
+                <h3 style="font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">The Basics</h3>
+
+                <div class="form-group">
+                    <label>Place Name *</label>
+                    <input type="text" th:field="*{placeName}" required placeholder="e.g. Joe's Pizza" 
+                           style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Date Visited *</label>
+                    <input type="date" th:field="*{date}" required 
+                           style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.9rem;">Cuisine</label>
+                        <input type="text" th:field="*{cuisine}" placeholder="e.g. Italian" 
+                               style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.9rem;">Price ($)</label>
+                        <input type="number" step="0.5" th:field="*{pricePerPerson}" placeholder="25.00" 
+                               style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                </div>
             </div>
-             <h3 style="margin-top: 20px; font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px;">Dishes</h3>
-            
-            <div id="food-items-container" style="display: flex; flex-direction: column; gap: 15px;"></div>
-
-            <button type="button" onclick="addFoodItem()" class="btn-outline" style="border-style: dashed; color: #555;">
-                <i class="fas fa-plus"></i> Add a Dish
-            </button>
 
 
-            <button type="submit" class="btn-dark" style="width: 100%; padding: 15px; margin-top: 20px;">
-                Save Full Review
+            <div>
+                <h3 style="font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">The Ratings</h3>
+                
+                <div class="form-group">
+                    <label>Overall Rating (e.g. 7.5) *</label>
+                    <input type="number" step="0.1" min="0" max="10" th:field="*{overallRating}" required 
+                           placeholder="0.0 - 10.0"
+                           style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+
+                <p style="font-size: 0.85rem; color: #666; margin: 15px 0 5px;">Category Breakdown</p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    
+                    <div>
+                        <label style="font-size: 0.8rem;">Food</label>
+                        <input type="number" step="0.1" min="0" max="10" th:field="*{foodScore}" placeholder="-"
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                    
+                    <div>
+                        <label style="font-size: 0.8rem;">Service</label>
+                        <input type="number" step="0.1" min="0" max="10" th:field="*{serviceScore}" placeholder="-"
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                    
+                    <div>
+                        <label style="font-size: 0.8rem;">Ambiance</label>
+                        <input type="number" step="0.1" min="0" max="10" th:field="*{ambianceScore}" placeholder="-"
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                </div>
+            </div>
+
+
+            <div>
+                <h3 style="font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">The Details</h3>
+
+                <div class="form-group">
+                    <label>My Review</label>
+                    <textarea th:field="*{overallDesc}" rows="5" placeholder="How was the experience? What stood out?"
+                              style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Inter';"></textarea>
+                </div>
+
+                <div class="form-group" style="margin-top: 15px;">
+                    <label>Social Links (Paste URL)</label>
+                    <input type="text" th:field="*{instagramUrl}" placeholder="Instagram Reel URL" 
+                           style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px;">
+                    <input type="text" th:field="*{tiktokUrl}" placeholder="TikTok Video URL" 
+                           style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+            </div>
+
+
+            <div>
+                <h3 style="font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">Specific Dishes</h3>
+                
+                <div id="food-items-container" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px;"></div>
+
+                <button type="button" onclick="addFoodItem()" class="btn-outline" style="border-style: dashed; color: #555;">
+                    <i class="fas fa-plus"></i> Add a Dish
+                </button>
+            </div>
+
+
+            <button type="submit" class="btn-dark" style="width: 100%; padding: 15px; margin-top: 20px; font-size: 1rem;">
+                Save Review
             </button>
 
         </form>
@@ -46,47 +127,35 @@
 </div>
 
 <script>
-    // Start counting from 0
     let itemIndex = 0;
 
     function addFoodItem() {
         const container = document.getElementById('food-items-container');
         
-        // Create the HTML for one row
-        // NOTICE: We use ${itemIndex} to generate unique names like foodItems[0].name
+        // This HTML must match the FoodItem class structure
         const rowHtml = `
             <div class="food-item-row" style="background: #f9f9f9; padding: 15px; border-radius: 12px; border: 1px solid #eee; position: relative;">
                 
-                <strong style="display: block; margin-bottom: 10px; color: #555;">Dish #${itemIndex + 1}</strong>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <strong style="color: #555;">Dish #${itemIndex + 1}</strong>
+                    <i class="fas fa-times" style="color: #ccc; cursor: pointer;" onclick="this.closest('.food-item-row').remove()"></i>
+                </div>
                 
                 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <input type="text" name="foodItems[${itemIndex}].name" placeholder="Dish Name" 
+                    <input type="text" name="foodItems[${itemIndex}].name" placeholder="Dish Name (e.g. Calamari)" 
                            required
                            style="flex: 2; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                     
-                    <select name="foodItems[${itemIndex}].rating" 
+                    <input type="number" step="0.1" min="0" max="10" name="foodItems[${itemIndex}].rating" placeholder="Score (0-10)" 
                             style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                        <option value="5">5</option>
-                        <option value="4">4</option>
-                        <option value="3">3</option>
-                        <option value="2">2</option>
-                        <option value="1">1</option>
-                    </select>
                 </div>
                 
-                <input type="text" name="foodItems[${itemIndex}].description" placeholder="Short review of this dish..." 
+                <input type="text" name="foodItems[${itemIndex}].description" placeholder="Brief thoughts..." 
                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-
-                <div style="position: absolute; top: 10px; right: 10px; cursor: pointer; color: #ccc;" onclick="this.parentElement.remove()">
-                    <i class="fas fa-times"></i>
-                </div>
             </div>
         `;
 
-        // Inject the HTML into the container
         container.insertAdjacentHTML('beforeend', rowHtml);
-
-        // Increment the counter for the next click
         itemIndex++;
     }
 </script>

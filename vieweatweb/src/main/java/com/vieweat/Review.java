@@ -24,7 +24,7 @@ public class Review {
 
     // --- 1. MANDATORY FIELDS ---
     @Column(unique = false, nullable = false)
-    private int overallRating;
+    private Double overallRating;
 
     @Column(unique = false, nullable = false)
     private String placeName;
@@ -42,9 +42,9 @@ public class Review {
     private String overallDesc;
 
     // --- 3. OPTIONAL SCORES ---
-    private Integer foodScore;
-    private Integer serviceScore;
-    private Integer ambianceScore;
+    private Double foodScore;
+    private Double serviceScore;
+    private Double ambianceScore;
 
     // --- 4. LIST ---
     @Builder.Default 

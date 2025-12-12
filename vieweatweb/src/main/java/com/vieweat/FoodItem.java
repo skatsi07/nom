@@ -19,7 +19,7 @@ public class FoodItem {
     private Long id; // Unique ID for this specific dish entry
 
     private String name;
-    private int rating;
+    private Double rating;
     
     @Column(columnDefinition = "TEXT")
     private String description;
