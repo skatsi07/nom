@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Add New Review</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="app-wrapper">
+
+    <header>
+      <div class="nav-buttons">
+        <a th:href="@{/}" class="btn-icon"><i class="fas fa-times"></i></a>
+      </div>
+      <div class="logo">New Review</div>
+      <div style="width: 40px;"></div>
+    </header>
+
+    <main class="main-content" style="padding: 20px;">
+        
+        <form th:action="@{/add}" th:object="${review}" method="post" style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <div class="form-group">
+                <label>Place Name</label>
+                <input type="text" th:field="*{placeName}" required placeholder="e.g. Joe's Pizza" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
+            </div>
+             <h3 style="margin-top: 20px; font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px;">Dishes</h3>
+            
+            <div id="food-items-container" style="display: flex; flex-direction: column; gap: 15px;"></div>
+
+            <button type="button" onclick="addFoodItem()" class="btn-outline" style="border-style: dashed; color: #555;">
+                <i class="fas fa-plus"></i> Add a Dish
+            </button>
+
+
+            <button type="submit" class="btn-dark" style="width: 100%; padding: 15px; margin-top: 20px;">
+                Save Full Review
+            </button>
+
+        </form>
+
+    </main>
+</div>
+
+<script>
+    // Start counting from 0
+    let itemIndex = 0;
+
+    function addFoodItem() {
+        const container = document.getElementById('food-items-container');
+        
+        // Create the HTML for one row
+        // NOTICE: We use ${itemIndex} to generate unique names like foodItems[0].name
+        const rowHtml = `
+            <div class="food-item-row" style="background: #f9f9f9; padding: 15px; border-radius: 12px; border: 1px solid #eee; position: relative;">
+                
+                <strong style="display: block; margin-bottom: 10px; color: #555;">Dish #${itemIndex + 1}</strong>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" name="foodItems[${itemIndex}].name" placeholder="Dish Name" 
+                           required
+                           style="flex: 2; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    
+                    <select name="foodItems[${itemIndex}].rating" 
+                            style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        <option value="5">5</option>
+                        <option value="4">4</option>
+                        <option value="3">3</option>
+                        <option value="2">2</option>
+                        <option value="1">1</option>
+                    </select>
+                </div>
+                
+                <input type="text" name="foodItems[${itemIndex}].description" placeholder="Short review of this dish..." 
+                       style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+
+                <div style="position: absolute; top: 10px; right: 10px; cursor: pointer; color: #ccc;" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+        `;
+
+        // Inject the HTML into the container
+        container.insertAdjacentHTML('beforeend', rowHtml);
+
+        // Increment the counter for the next click
+        itemIndex++;
+    }
+</script>
+
+</body>
+</html>

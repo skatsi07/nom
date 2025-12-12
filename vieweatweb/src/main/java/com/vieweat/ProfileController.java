@@ -3,95 +3,65 @@ package com.vieweat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import java.util.ArrayList;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 
 @Controller
+@RequiredArgsConstructor
 public class ProfileController {
 
+  private final ReviewRepository reviewRepository;
+  private final UserRepository userRepository;
+
+  // --- 1. HOME PAGE (Recent 5 Reviews) ---
   @GetMapping("/")
   public String home(Model model) {
-    List<Review> myReviews = new ArrayList<>();
-
-    // Data for the Profile Page
-    myReviews.add(Review.builder()
-        .placeName("Joe's Pizza")
-        .overallRating(5)
-        .date("12/12/2025")
-        .build());
-
-    myReviews.add(Review.builder()
-        .placeName("Sushi World")
-        .overallRating(4)
-        .date("12/10/2025")
-        .build());
-
-    myReviews.add(Review.builder()
-        .placeName("Burger Joint")
-        .overallRating(3)
-        .date("12/08/2025")
-        .build());
-        
-    myReviews.add(Review.builder()
-        .placeName("Taco Stand")
-        .overallRating(5)
-        .date("12/01/2025")
-        .cuisine("Mexican") 
-        .instagramUrl("https://instagram.com")
-        .build());
-
+    List<Review> myReviews = reviewRepository.findTop5ByOrderByDateDesc();
     model.addAttribute("reviews", myReviews);
     return "profile";
   }
 
+  // --- 2. ALL REVIEWS PAGE ---
   @GetMapping("/reviews")
   public String getAllReviews(Model model) {
-    List<Review> allReviews = new ArrayList<>();
-
-    // --- FIX: Use .builder() here too! ---
-    
-    // Original Items
-    allReviews.add(Review.builder()
-        .placeName("Joe's Pizza")
-        .overallRating(5)
-        .date("12/12/2025")
-        .build());
-
-    allReviews.add(Review.builder()
-        .placeName("Sushi World")
-        .overallRating(4)
-        .date("12/10/2025")
-        .build());
-
-    allReviews.add(Review.builder()
-        .placeName("Burger Joint")
-        .overallRating(3)
-        .date("12/08/2025")
-        .build());
-
-    allReviews.add(Review.builder()
-        .placeName("Taco Stand")
-        .overallRating(5)
-        .date("12/01/2025")
-        .build());
-
-    // New Items (Past History)
-    allReviews.add(Review.builder()
-        .placeName("Pasta House")
-        .overallRating(4)
-        .date("11/28/2025")
-        .build());
-
-    allReviews.add(Review.builder()
-        .placeName("Taco Stand")
-        .overallRating(5)
-        .date("12/01/2025")
-        .cuisine("Mexican") 
-        .instagramUrl("https://instagram.com")
-        .build());
-
+    List<Review> allReviews = reviewRepository.findAll();
     model.addAttribute("reviews", allReviews);
-    
     return "all-reviews";
+  }
+
+  // --- 3. SHOW THE "ADD REVIEW" FORM ---
+  @GetMapping("/add")
+  public String showAddReviewForm(Model model) {
+      model.addAttribute("review", new Review());
+      return "add-review";
+  }
+
+  // --- 4. SAVE THE REVIEW (Cleaning up Review) ---
+  @PostMapping("/add")
+  public String addReview(@ModelAttribute Review review) {
+    
+    // A. FIND USER
+    String myUsername = "skatsi07";
+    User currentUser = userRepository.findByUsername(myUsername);
+    review.setUser(currentUser);
+
+    // B. CLEAN UP THE FOOD ITEMS LIST
+    // 1. Remove any item that has no Name (User left it blank)
+    review.getFoodItems().removeIf(item -> item.getName() == null || item.getName().trim().isEmpty());
+
+    // 2. Link the remaining valid items to this review
+    // (We must do this manually because the HTML form doesn't know about the Review ID yet)
+    for (FoodItem item : review.getFoodItems()) {
+        item.setReview(review);
+    }
+    
+    // C. SAVE TO MYSQL
+    // This will now only save the Review + the non-empty FoodItems
+    reviewRepository.save(review);
+
+    return "redirect:/";
   }
 }

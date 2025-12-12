@@ -28,7 +28,9 @@ public class User {
 
     private String password;
     
+    @Column(length = 1000)
     private String profilePicUrl;
+    
     private String bio;
 
     // --- THE RELATIONSHIP ---
