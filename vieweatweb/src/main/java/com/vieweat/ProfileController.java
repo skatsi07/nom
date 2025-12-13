@@ -6,6 +6,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import lombok.RequiredArgsConstructor;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
 import java.util.List;
 
@@ -78,6 +82,43 @@ public class ProfileController {
     // C. SAVE TO MYSQL
     // This will now only save the Review + the non-empty FoodItems
     reviewRepository.save(review);
+
+    return "redirect:/";
+  }
+  // --- 5. HIDDEN EDIT PROFILE PAGE ---
+  @GetMapping("/edit-profile")
+  public String showEditProfile(Model model) {
+      // Fetch 'You' so we can fill the form with your current bio/pic
+      User user = userRepository.findByUsername("skatsi07");
+      model.addAttribute("user", user);
+      return "edit-profile";
+  }
+
+  // --- 6. HANDLE THE UPLOAD ---
+  @PostMapping("/edit-profile/save")
+  public String saveProfile(
+        @ModelAttribute User user,
+        @RequestParam("image") MultipartFile multipartFile) throws IOException {
+    
+    // 1. Fetch the real user from DB (to prevent ID tampering)
+    User existingUser = userRepository.findByUsername("skatsi07");
+
+    // 2. Update Bio
+    existingUser.setBio(user.getBio());
+
+    // 3. Handle Image Upload (If they chose one)
+    if (!multipartFile.isEmpty()) {
+        String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+        
+        // Set the path that the HTML will use to find the image
+        existingUser.setProfilePicUrl("/user-photos/" + existingUser.getId() + "/" + fileName);
+
+        // Save the actual file to your project folder: user-photos/{id}/
+        String uploadDir = "user-photos/" + existingUser.getId();
+        FileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
+    }
+
+    userRepository.save(existingUser);
 
     return "redirect:/";
   }
