@@ -35,8 +35,9 @@
                       <span th:unless="${user.profilePicUrl != null && !user.profilePicUrl.isEmpty()}">Me</span>
                   </div>
                   
-                  <h1 th:text="${user.username}">Username Placeholder</h1>
-                  <h2 th:text="${user.bio}">Bio Placeholder</h2>
+                  <h2 th:text="|@${user.username}|" style="margin-bottom: 3px;">Username Placeholder</h2>
+                  <h1 th:text="${user.name}" style="margin-top: 0;">Name Placeholder</h1>
+                  <h4 th:text="${user.bio}">Bio Placeholder</h4>
                   
                   <div class="social-buttons" style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;">
                       <div style="display: flex; gap: 10px; justify-content: center; width: 100%; margin-bottom: 8px;">
