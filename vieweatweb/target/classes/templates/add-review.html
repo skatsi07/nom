@@ -21,7 +21,8 @@
 
     <main class="main-content" style="padding: 20px;">
         
-        <form th:action="@{/add}" th:object="${review}" method="post" style="display: flex; flex-direction: column; gap: 20px;">
+        <form th:action="@{/add}" th:object="${review}" method="post" enctype="multipart/form-data" 
+                style="display: flex; flex-direction: column; gap: 20px;">
             
             <div style="background: #fff; padding: 5px 0;">
                 <h3 style="font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">The Basics</h3>
@@ -116,6 +117,16 @@
                 </button>
             </div>
 
+            <div>
+                <h3 style="font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">Photos</h3>
+                
+                <div class="form-group">
+                    <label>Upload Photos (Optional)</label>
+                    <input type="file" name="reviewImages" multiple accept="image/png, image/jpeg"
+                           style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">
+                    <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Hold Ctrl (Windows) or Cmd (Mac) to select multiple files.</p>
+                </div>
+            </div>
 
             <button type="submit" class="btn-dark" style="width: 100%; padding: 15px; margin-top: 20px; font-size: 1rem;">
                 Save Review

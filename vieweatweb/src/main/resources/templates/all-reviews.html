@@ -159,7 +159,10 @@
             </div>
 
             <div class="modal-right">
-                <div class="modal-image-placeholder"><p>Photo Gallery</p></div>
+                <div class="photo-gallery">
+                    <img th:each="photo : ${review.photos}" th:src="${photo.photoUrl}" 
+                            style="width: 100px; height: 100px; object-fit: cover;">
+                </div>
             </div>
 
         </div>

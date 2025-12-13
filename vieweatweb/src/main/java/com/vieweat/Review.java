@@ -50,4 +50,9 @@ public class Review {
     @Builder.Default 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
     private List<FoodItem> foodItems = new ArrayList<>();
+
+    // --- 5. PHOTOS (One Review -> Many Photos) ---
+    @Builder.Default
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReviewPhoto> photos = new ArrayList<>();
 }

@@ -54,10 +54,48 @@ public class ProfileController {
   }
 
   // --- 3. SHOW THE "ADD REVIEW" FORM ---
-  @GetMapping("/add")
-  public String showAddReviewForm(Model model) {
-      model.addAttribute("review", new Review());
-      return "add-review";
+  @PostMapping("/add")
+  public String addReview(
+          @ModelAttribute Review review,
+          @RequestParam("reviewImages") MultipartFile[] files) throws IOException { // 1. Accept files array
+    
+    // A. FIND USER & LINK
+    User currentUser = userRepository.findByUsername("skatsi07");
+    review.setUser(currentUser);
+
+    // B. CLEAN FOOD ITEMS (Remove blanks)
+    review.getFoodItems().removeIf(item -> item.getName() == null || item.getName().trim().isEmpty());
+    for (FoodItem item : review.getFoodItems()) {
+        item.setReview(review);
+    }
+    
+    // C. SAVE REVIEW FIRST (Crucial step!)
+    // We must save it now to generate the 'id' (e.g., 50) needed for the folder name
+    Review savedReview = reviewRepository.save(review);
+
+    // D. PROCESS PHOTOS (If any)
+    if (files != null && files.length > 0) {
+        for (MultipartFile file : files) {
+            if (!file.isEmpty()) {
+                String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+                
+                // 1. Create the database object
+                ReviewPhoto photo = new ReviewPhoto();
+                photo.setPhotoUrl("/review-photos/" + savedReview.getId() + "/" + fileName);
+                photo.setReview(savedReview); // Link back to review
+                
+                // 2. Add to the list
+                savedReview.getPhotos().add(photo);
+
+                // 3. Save file to Hard Drive (review-photos/50/pizza.jpg)
+                String uploadDir = "review-photos/" + savedReview.getId();
+                FileUploadUtil.saveFile(uploadDir, fileName, file);
+            }
+        }
+        // Save again to update the photos list in DB
+        reviewRepository.save(savedReview);
+    }
+    return "redirect:/";
   }
 
   // --- 4. SAVE THE REVIEW (Cleaning up Review) ---
