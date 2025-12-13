@@ -84,15 +84,23 @@
                      th:data-service="${review.serviceScore}"
                      th:data-ambiance="${review.ambianceScore}"
                      th:data-insta="${review.instagramUrl}"
-                     th:data-tiktok="${review.tiktokUrl}">
+                     th:data-tiktok="${review.tiktokUrl}"
                      
-                  <div class="card-image-placeholder">
-                    <i class="fas fa-utensils"></i>
+                     th:data-photos="${#strings.listJoin(review.photos.![photoUrl], ',')}">
+                     
+                  <div class="card-image-placeholder" style="overflow: hidden; position: relative;">
+                    
+                    <i th:if="${review.photos.isEmpty()}" class="fas fa-utensils"></i>
+                    
+                    <img th:unless="${review.photos.isEmpty()}" 
+                         th:src="${review.photos[0].photoUrl}" 
+                         style="width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0;">
+                  
                   </div>
+                  
                   <div class="card-info">
                     <h3 th:text="${review.placeName}">Place</h3>
-                    <div class="star-group" th:data-score="${review.overallRating}">
-                        </div>
+                    <div class="star-group" th:data-score="${review.overallRating}"></div>
                   </div>
                 </div>
 
@@ -159,9 +167,9 @@
             </div>
 
             <div class="modal-right">
-                <div class="photo-gallery">
-                    <img th:each="photo : ${review.photos}" th:src="${photo.photoUrl}" 
-                            style="width: 100px; height: 100px; object-fit: cover;">
+                <div id="m-photos-container" class="photo-gallery" 
+                     style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; overflow-y: 
+                            auto; max-height: 400px;">
                 </div>
             </div>
 
@@ -170,30 +178,52 @@
 </div>
 
 <script>
+    // 1. MAIN OPEN FUNCTION
     function openModal(card) {
         const d = card.dataset;
 
-        // 1. Basic Fields
+        // A. Basic Fields
         document.getElementById('m-place').innerText = d.place;
+        
+        // These functions (updateField, etc.) must exist for this to work!
         updateField('row-date', 'm-date', d.date);
         updateField('row-cuisine', 'm-cuisine', d.cuisine);
         updateField('row-price', 'm-price', d.price);
         updateField('row-desc', 'm-desc', d.desc);
 
-        // 2. Stars
+        // B. Stars
         renderStars('m-main-stars', d.rating);
         renderStars('stars-overall', d.rating);
         updateRatingRow('row-rating-food', 'stars-food', d.food);
         updateRatingRow('row-rating-service', 'stars-service', d.service);
         updateRatingRow('row-rating-ambiance', 'stars-ambiance', d.ambiance);
 
-        // 3. Logic for Video Links (NEW)
+        // C. PHOTOS LOGIC
+        const photoContainer = document.getElementById('m-photos-container');
+        photoContainer.innerHTML = ''; // Clear previous images
+
+        if (d.photos && d.photos.length > 0) {
+            const urls = d.photos.split(','); 
+            urls.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.style.width = '100%';
+                img.style.height = '150px';
+                img.style.objectFit = 'cover';
+                img.style.borderRadius = '8px';
+                img.style.border = '1px solid #eee';
+                photoContainer.appendChild(img);
+            });
+        } else {
+            photoContainer.innerHTML = '<p style="color:#999; text-align:center; width:100%;">No photos available</p>';
+        }
+
+        // D. Video Links Logic
         const instaBtn = document.getElementById('link-insta');
         const tiktokBtn = document.getElementById('link-tiktok');
         const section = document.getElementById('link-section');
         let hasAnyLink = false;
 
-        // Check Instagram
         if (d.insta && d.insta !== 'null' && d.insta !== '') {
             instaBtn.style.display = 'flex';
             instaBtn.href = d.insta;
@@ -202,7 +232,6 @@
             instaBtn.style.display = 'none';
         }
 
-        // Check TikTok
         if (d.tiktok && d.tiktok !== 'null' && d.tiktok !== '') {
             tiktokBtn.style.display = 'flex';
             tiktokBtn.href = d.tiktok;
@@ -211,20 +240,22 @@
             tiktokBtn.style.display = 'none';
         }
 
-        // Hide entire section if NO links exist
         if (hasAnyLink) {
             section.style.display = 'block';
         } else {
             section.style.display = 'none';
         }
 
+        // E. Finally, show the modal
         document.getElementById('reviewModal').classList.add('active');
     }
 
+    // 2. CLOSE FUNCTION
     function closeModal(event) {
         document.getElementById('reviewModal').classList.remove('active');
     }
 
+    // 3. HELPER: Hide fields if empty
     function updateField(rowId, textId, value) {
         const row = document.getElementById(rowId);
         if (!value || value === 'null') {
@@ -235,6 +266,7 @@
         }
     }
 
+    // 4. HELPER: Hide rating row if 0 or null
     function updateRatingRow(rowId, starContainerId, value) {
         const row = document.getElementById(rowId);
         if (!value || value === 'null' || value == 0) {
@@ -245,8 +277,8 @@
         }
     }
 
+    // 5. HELPER: Render Stars inside Modal
     function renderStars(containerId, rawScore) {
-        // Convert 0-10 input to 0-5 output
         if (!rawScore) return;
         
         const score5 = rawScore / 2;
@@ -262,7 +294,6 @@
             html += '<i class="fas fa-star-half-alt" style="color: #e5c100; margin-right: 2px;"></i>';
         }
         
-        // Optional: Add the text number for clarity
         html += `<span style="color:#888; font-size:0.8rem; margin-left:5px;">(${rawScore})</span>`;
 
         document.getElementById(containerId).innerHTML = html;

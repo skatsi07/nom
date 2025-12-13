@@ -98,31 +98,6 @@ public class ProfileController {
     return "redirect:/";
   }
 
-  // --- 4. SAVE THE REVIEW (Cleaning up Review) ---
-  @PostMapping("/add")
-  public String addReview(@ModelAttribute Review review) {
-    
-    // A. FIND USER
-    String myUsername = "skatsi07";
-    User currentUser = userRepository.findByUsername(myUsername);
-    review.setUser(currentUser);
-
-    // B. CLEAN UP THE FOOD ITEMS LIST
-    // 1. Remove any item that has no Name (User left it blank)
-    review.getFoodItems().removeIf(item -> item.getName() == null || item.getName().trim().isEmpty());
-
-    // 2. Link the remaining valid items to this review
-    // (We must do this manually because the HTML form doesn't know about the Review ID yet)
-    for (FoodItem item : review.getFoodItems()) {
-        item.setReview(review);
-    }
-    
-    // C. SAVE TO MYSQL
-    // This will now only save the Review + the non-empty FoodItems
-    reviewRepository.save(review);
-
-    return "redirect:/";
-  }
   // --- 5. HIDDEN EDIT PROFILE PAGE ---
   @GetMapping("/edit-profile")
   public String showEditProfile(Model model) {
