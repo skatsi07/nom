@@ -5,6 +5,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,7 +55,14 @@ public class ProfileController {
       return "all-reviews";
   }
 
-  // --- 3. SHOW THE "ADD REVIEW" FORM ---
+    // --- 3a. GET: Show the Form ---
+    @GetMapping("/add")
+    public String showAddReviewForm(Model model) {
+        model.addAttribute("review", new Review());
+        return "add-review";
+    }
+
+  // --- 3b. POST: Save the Form ---
   @PostMapping("/add")
   public String addReview(
           @ModelAttribute Review review,
@@ -98,7 +107,7 @@ public class ProfileController {
     return "redirect:/";
   }
 
-  // --- 5. HIDDEN EDIT PROFILE PAGE ---
+  // --- 4. HIDDEN EDIT PROFILE PAGE ---
   @GetMapping("/edit-profile")
   public String showEditProfile(Model model) {
       // Fetch 'You' so we can fill the form with your current bio/pic
@@ -134,5 +143,93 @@ public class ProfileController {
     userRepository.save(existingUser);
 
     return "redirect:/";
+  }
+
+  // --- 5. SHOW LIST OF REVIEWS TO MANAGE ---
+  @GetMapping("/manage-reviews")
+  public String manageReviews(Model model) {
+      User currentUser = userRepository.findByUsername("skatsi07");
+      
+      // Re-use the method we made earlier to find all reviews
+      List<Review> myReviews = reviewRepository.findAllByUserOrderByDateDesc(currentUser);
+      
+      model.addAttribute("reviews", myReviews);
+      return "manage-reviews";
+  }
+
+  // --- 6. SHOW THE EDIT FORM (PRE-FILLED) ---
+  @GetMapping("/edit/{id}")
+  public String showEditForm(@PathVariable("id") Long id, Model model) {
+      // Find the review by ID
+      Review review = reviewRepository.findById(id)
+              .orElseThrow(() -> new IllegalArgumentException("Invalid review Id:" + id));
+      
+      // Verify it belongs to skatsi07 (Security Check)
+      if (!review.getUser().getUsername().equals("skatsi07")) {
+          return "redirect:/manage-reviews"; // Block access if it's not yours
+      }
+
+      model.addAttribute("review", review);
+      return "edit-review";
+  }
+
+  // --- 7. HANDLE THE UPDATE ---
+  @PostMapping("/update")
+  public String updateReview(
+          @ModelAttribute Review formReview,
+          @RequestParam("reviewImages") MultipartFile[] files) throws IOException {
+
+      // 1. Fetch the EXISTING review from DB using the ID
+      // We do this to ensure we don't lose the User link or existing photos
+      Review existingReview = reviewRepository.findById(formReview.getId())
+              .orElseThrow(() -> new IllegalArgumentException("Invalid review Id"));
+
+      // 2. Update Basic Fields
+      existingReview.setPlaceName(formReview.getPlaceName());
+      existingReview.setDate(formReview.getDate());
+      existingReview.setOverallRating(formReview.getOverallRating());
+      existingReview.setCuisine(formReview.getCuisine());
+      existingReview.setPricePerPerson(formReview.getPricePerPerson());
+      existingReview.setOverallDesc(formReview.getOverallDesc());
+      existingReview.setFoodScore(formReview.getFoodScore());
+      existingReview.setServiceScore(formReview.getServiceScore());
+      existingReview.setAmbianceScore(formReview.getAmbianceScore());
+      existingReview.setInstagramUrl(formReview.getInstagramUrl());
+      existingReview.setTiktokUrl(formReview.getTiktokUrl());
+
+      // 3. Update Food Items
+      // We clear the old list and re-add the ones from the form to handle updates/additions
+      // Note: This works because we included hidden IDs in the HTML form
+      existingReview.getFoodItems().clear();
+      if (formReview.getFoodItems() != null) {
+          formReview.getFoodItems().removeIf(item -> item.getName() == null || item.getName().trim().isEmpty());
+          for (FoodItem item : formReview.getFoodItems()) {
+              item.setReview(existingReview); // Re-link to parent
+              existingReview.getFoodItems().add(item);
+          }
+      }
+
+      // 4. Handle NEW Photos (Append to existing list)
+      if (files != null && files.length > 0) {
+          for (MultipartFile file : files) {
+              if (!file.isEmpty()) {
+                  String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+                  
+                  ReviewPhoto photo = new ReviewPhoto();
+                  photo.setPhotoUrl("/review-photos/" + existingReview.getId() + "/" + fileName);
+                  photo.setReview(existingReview);
+                  
+                  existingReview.getPhotos().add(photo);
+
+                  String uploadDir = "review-photos/" + existingReview.getId();
+                  FileUploadUtil.saveFile(uploadDir, fileName, file);
+              }
+          }
+      }
+
+      // 5. Save updates
+      reviewRepository.save(existingReview);
+
+      return "redirect:/manage-reviews";
   }
 }

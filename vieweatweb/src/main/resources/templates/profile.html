@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
   <title>Let's Eat</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -11,13 +13,6 @@
 <body>
 
 <div class="app-wrapper">
-
-    <header>
-      <div class="logo">Let's Eat...</div>
-      <div class="nav-buttons">
-        <a th:href="@{/reviews}" class="btn-dark">Past Reviews</a>
-      </div>
-    </header>
 
     <div class="layout-grid">
 
@@ -34,7 +29,7 @@
                   
                   <h2 th:text="|@${user.username}|" style="margin-bottom: 3px;">Username Placeholder</h2>
                   <h1 th:text="${user.name}" style="margin-top: 0;">Name Placeholder</h1>
-                  <h4 th:text="${user.bio}">Bio Placeholder</h4>
+                  <h5 th:text="${user.bio}">Bio Placeholder</h5>
                   
                   <div class="social-buttons">
                     <button class="btn-social"><i class="fab fa-instagram"></i> Instagram</button>
@@ -96,14 +91,23 @@
         <button class="modal-close-btn" onclick="closeModal()">&times;</button>
 
         <div class="modal-body">
-            
-            <div class="modal-left">
+
+            <div class="m-area-header">
                 <div class="modal-header-row">
                     <h2 id="m-place">Place Name</h2>
                     <div id="m-main-stars" class="modal-stars-large"></div>
                 </div>
                 <p class="modal-subtitle">Location Data Placeholder</p>
+            </div>
 
+            <div id="photo-carousel-wrapper" class="carousel-container m-area-images">
+                <button class="carousel-btn prev" onclick="scrollCarousel(-1)"><i class="fas fa-chevron-left"></i></button>
+                <div id="m-carousel-track" class="carousel-track">
+                    </div>
+                <button class="carousel-btn next" onclick="scrollCarousel(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+
+            <div class="m-area-content">
                 <hr class="modal-divider">
 
                 <div class="modal-meta-grid">
@@ -127,25 +131,15 @@
                     <hr class="modal-divider">
                     <h3>Quick Links to Videos</h3>
                     <div class="quick-links-row">
-                        
                         <a id="link-insta" href="#" target="_blank" class="video-link-card">
                             <div class="video-icon instagram"><i class="fab fa-instagram"></i></div>
                             <div><strong>Instagram</strong><br><small>Reel</small></div>
                         </a>
-
                         <a id="link-tiktok" href="#" target="_blank" class="video-link-card">
                             <div class="video-icon tiktok"><i class="fab fa-tiktok"></i></div>
                             <div><strong>Tik Tok</strong><br><small>Video</small></div>
                         </a>
-
                     </div>
-                </div>
-
-            </div>
-
-            <div class="modal-right">
-                <div id="m-photos-container" class="photo-gallery" 
-                     style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; overflow-y: auto; max-height: 400px;">
                 </div>
             </div>
 
@@ -157,41 +151,50 @@
     function openModal(card) {
         const d = card.dataset;
 
-        // Basic Fields
+        // 1. Basic Fields
         document.getElementById('m-place').innerText = d.place;
         updateField('row-date', 'm-date', d.date);
         updateField('row-cuisine', 'm-cuisine', d.cuisine);
         updateField('row-price', 'm-price', d.price);
         updateField('row-desc', 'm-desc', d.desc);
 
-        // Stars
+        // 2. Stars
         renderStars('m-main-stars', d.rating);
         renderStars('stars-overall', d.rating);
         updateRatingRow('row-rating-food', 'stars-food', d.food);
         updateRatingRow('row-rating-service', 'stars-service', d.service);
         updateRatingRow('row-rating-ambiance', 'stars-ambiance', d.ambiance);
 
-        // --- PHOTOS LOGIC ---
-        const photoContainer = document.getElementById('m-photos-container');
-        photoContainer.innerHTML = ''; // Clear previous images
+        // --- 3. CAROUSEL LOGIC ---
+        const carouselWrapper = document.getElementById('photo-carousel-wrapper');
+        const track = document.getElementById('m-carousel-track');
+        track.innerHTML = ''; // Clear previous images
 
         if (d.photos && d.photos.length > 0) {
+            // Show the carousel
+            carouselWrapper.style.display = 'block';
+            
             const urls = d.photos.split(',');
             urls.forEach(url => {
                 const img = document.createElement('img');
                 img.src = url;
-                img.style.width = '100%';
-                img.style.height = '150px';
-                img.style.objectFit = 'cover';
-                img.style.borderRadius = '8px';
-                img.style.border = '1px solid #eee';
-                photoContainer.appendChild(img);
+                track.appendChild(img);
             });
+
+            // Hide arrows if there is only 1 photo
+            const btns = carouselWrapper.querySelectorAll('.carousel-btn');
+            if(urls.length <= 1) {
+                btns.forEach(b => b.style.display = 'none');
+            } else {
+                btns.forEach(b => b.style.display = 'flex'); 
+            }
+
         } else {
-            photoContainer.innerHTML = '<p style="color:#999; text-align:center; width:100%;">No photos available</p>';
+            // Hide the entire carousel section if no photos
+            carouselWrapper.style.display = 'none';
         }
 
-        // Video Links Logic
+        // 4. Video Links
         const instaBtn = document.getElementById('link-insta');
         const tiktokBtn = document.getElementById('link-tiktok');
         const section = document.getElementById('link-section');
@@ -220,6 +223,13 @@
         }
 
         document.getElementById('reviewModal').classList.add('active');
+    }
+
+    // --- NEW: Function to handle Arrow Clicks ---
+    function scrollCarousel(direction) {
+        const track = document.getElementById('m-carousel-track');
+        const scrollAmount = track.clientWidth * direction;
+        track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
 
     function closeModal(event) {
@@ -269,7 +279,6 @@
 </script>
 
 <script>
-    // Run this when page loads to draw stars on the cards/rows
     document.addEventListener("DOMContentLoaded", function() {
         const starGroups = document.querySelectorAll('.star-group');
         
