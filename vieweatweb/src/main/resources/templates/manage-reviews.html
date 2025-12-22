@@ -29,7 +29,7 @@
             <div th:each="review : ${reviews}" 
                  style="background: white; padding: 15px; border-radius: 12px; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
                 
-                <div>
+                <div style="flex: 1;">
                     <strong th:text="${review.placeName}" style="font-size: 1.1rem; display: block;">Place Name</strong>
                     <span th:text="${review.date}" style="color: #888; font-size: 0.9rem;">Date</span>
                     <div style="color: #e5c100; font-size: 0.9rem; margin-top: 5px;">
@@ -37,9 +37,18 @@
                     </div>
                 </div>
 
-                <a th:href="@{/edit/{id}(id=${review.id})}" class="btn-dark" style="padding: 10px 20px; text-decoration: none;">
-                    Edit <i class="fas fa-pen" style="margin-left: 5px;"></i>
-                </a>
+                <div style="display: flex; gap: 10px;">
+                    <a th:href="@{/edit/{id}(id=${review.id})}" class="btn-dark" style="padding: 8px 15px; text-decoration: none; font-size: 0.9rem;">
+                        Edit <i class="fas fa-pen" style="margin-left: 5px;"></i>
+                    </a>
+
+                    <a th:href="@{/delete/{id}(id=${review.id})}" 
+                       onclick="return confirm('Are you sure you want to delete this review? This cannot be undone.');"
+                       class="btn-red">
+                        Delete <i class="fas fa-trash" style="margin-left: 5px;"></i>
+                    </a>
+                </div>
+
             </div>
         </div>
 

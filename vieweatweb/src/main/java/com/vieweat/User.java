@@ -35,6 +35,11 @@ public class User {
     
     private String bio;
 
+    @Column(length = 1000)
+    private String tiktokUrl;
+    @Column(length = 1000)
+    private String instagramUrl;
+
     // --- THE RELATIONSHIP ---
     // One User has Many Reviews. 
     // "mappedBy" tells MySQL to look at the 'user' field in the Review class to find the link.

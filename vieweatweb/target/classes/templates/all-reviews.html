@@ -1,320 +1,345 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>All Reviews</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  
-  <link rel="stylesheet" href="/css/style.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>All Reviews</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
 
-<div class="app-wrapper">
+    <div class="app-wrapper">
 
-    <div class="layout-grid">
+        <div class="layout-grid">
 
-        <aside class="topbar">
-            <section class="hero profile-card">
-              <div class="cover-photo"></div>
-              <div class="profile-info"> 
-                  <div class="profile-pic">
-                      <img th:if="${user.profilePicUrl != null && !user.profilePicUrl.isEmpty()}" 
-                           th:src="${user.profilePicUrl}" 
-                           style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
-                      <span th:unless="${user.profilePicUrl != null && !user.profilePicUrl.isEmpty()}">Me</span>
-                  </div>
-                  
-                  <h2 th:text="|@${user.username}|" style="margin-bottom: 3px;">Username Placeholder</h2>
-                  <h1 th:text="${user.name}" style="margin-top: 0;">Name Placeholder</h1>
-                  <h5 th:text="${user.bio}">Bio Placeholder</h5>
-                  
-                  <div class="social-buttons" style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;">
-                      <div style="display: flex; gap: 10px; justify-content: center; width: 100%; margin-bottom: 8px;">
-                          <button class="btn-social"><i class="fab fa-instagram"></i> Instagram</button>
-                          <button class="btn-social"><i class="fab fa-tiktok"></i> TikTok</button>
-                      </div>
-                      <a th:href="@{/}" class="btn-dark" style="width: 100%; display: block; text-align: center; text-decoration: none;">
-                          <i class="fas fa-arrow-left"></i> Back to Profile
-                      </a>
-                  </div>
-              </div>
-            </section>
-        </aside>
+            <aside class="topbar">
+                <section class="hero profile-card">
+                    <div class="cover-photo"></div>
+                    <div class="profile-info">
+                        <div class="profile-pic">
+                            <img th:if="${user.profilePicUrl != null && !user.profilePicUrl.isEmpty()}"
+                                th:src="${user.profilePicUrl}"
+                                style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                            <span th:unless="${user.profilePicUrl != null && !user.profilePicUrl.isEmpty()}">Me</span>
+                        </div>
 
-        <main class="main-content full-width" style="box-shadow: none; border: none;">
-            
-            <section class="container">
-              
-              <div class="search-container">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="search-input" placeholder="Search reviews...">
-              </div>
+                        <h2 th:text="|@${user.username}|" style="margin-bottom: 3px;">Username Placeholder</h2>
+                        <h1 th:text="${user.name}" style="margin-top: 0;">Name Placeholder</h1>
+                        <h5 th:text="${user.bio}">Bio Placeholder</h5>
 
-              <div class="filter-buttons">
-                <button class="btn-filter">Cuisine</button>
-                <button class="btn-filter">Date</button>
-                <button class="btn-filter">Stars</button>
-                <button class="btn-filter">Price</button>
-                <div style="flex: 1;"></div>
-                <button class="btn-filter sort-btn">Sort <i class="fas fa-chevron-down"></i></button>
-              </div>
+                        <div class="social-buttons"
+                            style="display: flex; flex-direction: column; align-items: center; margin-top: 15px;">
+                            <div
+                                style="display: flex; gap: 10px; justify-content: center; width: 100%; margin-bottom: 10px;">
 
-              <div class="review-grid-cards">
-                
-                <div th:each="review : ${reviews}" class="review-card-large" 
-                     onclick="openModal(this)"
-                     th:data-place="${review.placeName}"
-                     th:data-date="${review.date}"
-                     th:data-rating="${review.overallRating}"
-                     th:data-cuisine="${review.cuisine}"
-                     th:data-price="${review.pricePerPerson}"
-                     th:data-desc="${review.overallDesc}"
-                     th:data-food="${review.foodScore}"
-                     th:data-service="${review.serviceScore}"
-                     th:data-ambiance="${review.ambianceScore}"
-                     th:data-insta="${review.instagramUrl}"
-                     th:data-tiktok="${review.tiktokUrl}"
-                     
-                     th:data-photos="${#strings.listJoin(review.photos.![photoUrl], ',')}">
-                     
-                  <div class="card-image-placeholder" style="overflow: hidden; position: relative;">
-                    
-                    <i th:if="${review.photos.isEmpty()}" class="fas fa-utensils"></i>
-                    
-                    <img th:unless="${review.photos.isEmpty()}" 
-                         th:src="${review.photos[0].photoUrl}" 
-                         style="width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0;">
-                  
-                  </div>
-                  
-                  <div class="card-info">
-                    <h3 th:text="${review.placeName}">Place</h3>
-                    <div class="star-group" th:data-score="${review.overallRating}"></div>
-                  </div>
-                </div>
+                                <a th:if="${user.instagramUrl != null && !user.instagramUrl.isEmpty()}"
+                                    th:href="${user.instagramUrl}" target="_blank" class="btn-social"
+                                    style="text-decoration: none; color: #333; display: flex; align-items: center;">
+                                    <i class="fab fa-instagram" style="margin-right: 5px;"></i> Instagram
+                                </a>
 
-              </div>
-              
-            </section>
+                                <a th:if="${user.tiktokUrl != null && !user.tiktokUrl.isEmpty()}"
+                                    th:href="${user.tiktokUrl}" target="_blank" class="btn-social"
+                                    style="text-decoration: none; color: #333; display: flex; align-items: center;">
+                                    <i class="fab fa-tiktok" style="margin-right: 5px;"></i> TikTok
+                                </a>
 
-        </main>
+                            </div>
+
+                            <a th:href="@{/}" class="btn-dark"
+                                style="width: 100%; display: block; text-align: center; text-decoration: none; padding: 10px 0;">
+                                <i class="fas fa-arrow-left"></i> Back to Profile
+                            </a>
+
+                        </div>
+                    </div>
+                </section>
+            </aside>
+
+            <main class="main-content full-width" style="box-shadow: none; border: none;">
+
+                <section class="container">
+
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" class="search-input" placeholder="Search reviews...">
+                    </div>
+
+                    <div class="filter-buttons">
+                        <button class="btn-filter">Cuisine</button>
+                        <button class="btn-filter">Date</button>
+                        <button class="btn-filter">Stars</button>
+                        <button class="btn-filter">Price</button>
+                        <div style="flex: 1;"></div>
+                        <button class="btn-filter sort-btn">Sort <i class="fas fa-chevron-down"></i></button>
+                    </div>
+
+                    <div class="review-grid-cards">
+
+                        <div th:each="review : ${reviews}" class="review-card-large" onclick="openModal(this)"
+                            th:data-place="${review.placeName}" th:data-date="${review.date}"
+                            th:data-rating="${review.overallRating}" th:data-cuisine="${review.cuisine}"
+                            th:data-price="${review.pricePerPerson}" th:data-desc="${review.overallDesc}"
+                            th:data-food="${review.foodScore}" th:data-service="${review.serviceScore}"
+                            th:data-ambiance="${review.ambianceScore}" th:data-insta="${review.instagramUrl}"
+                            th:data-tiktok="${review.tiktokUrl}"
+                            th:data-photos="${#strings.listJoin(review.photos.![photoUrl], ',')}">
+
+                            <div class="card-image-placeholder" style="overflow: hidden; position: relative;">
+
+                                <i th:if="${review.photos.isEmpty()}" class="fas fa-utensils"></i>
+
+                                <img th:unless="${review.photos.isEmpty()}" th:src="${review.photos[0].photoUrl}"
+                                    style="width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0;">
+
+                            </div>
+
+                            <div class="card-info">
+                                <h3 th:text="${review.placeName}">Place</h3>
+                                <div class="star-group" th:data-score="${review.overallRating}"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </main>
+        </div>
+
     </div>
 
-</div>
+    <div id="reviewModal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
 
-<div id="reviewModal" class="modal-overlay" onclick="closeModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        
-        <button class="modal-close-btn" onclick="closeModal()">&times;</button>
+            <button class="modal-close-btn" onclick="closeModal()">&times;</button>
 
-        <div class="modal-body">
+            <div class="modal-body">
 
-            <div class="m-area-header">
-                <div class="modal-header-row">
-                    <h2 id="m-place">Place Name</h2>
-                    <div id="m-main-stars" class="modal-stars-large"></div>
-                </div>
-                <p class="modal-subtitle">Location Data Placeholder</p>
-            </div>
-
-            <div id="photo-carousel-wrapper" class="carousel-container m-area-images">
-                <button class="carousel-btn prev" onclick="scrollCarousel(-1)"><i class="fas fa-chevron-left"></i></button>
-                <div id="m-carousel-track" class="carousel-track">
+                <div class="m-area-header">
+                    <div class="modal-header-row">
+                        <h2 id="m-place">Place Name</h2>
+                        <div id="m-main-stars" class="modal-stars-large"></div>
                     </div>
-                <button class="carousel-btn next" onclick="scrollCarousel(1)"><i class="fas fa-chevron-right"></i></button>
-            </div>
-
-            <div class="m-area-content">
-                <hr class="modal-divider">
-
-                <div class="modal-meta-grid">
-                    <div class="meta-row" id="row-date"><strong>Date Visited:</strong> <span id="m-date"></span></div>
-                    <div class="meta-row" id="row-cuisine"><strong>Cuisine:</strong> <span id="m-cuisine"></span></div>
-                    <div class="meta-row" id="row-price"><strong>Price:</strong> $<span id="m-price"></span></div>
-                    <div class="meta-row description-box" id="row-desc"><strong>Description:</strong> <p id="m-desc"></p></div>
+                    <p class="modal-subtitle">Location Data Placeholder</p>
                 </div>
 
-                <hr class="modal-divider">
-
-                <h3>Rating Breakdown</h3>
-                <div class="rating-breakdown">
-                    <div class="rating-row" id="row-rating-food"><span>Food</span> <div class="stars-right" id="stars-food"></div></div>
-                    <div class="rating-row" id="row-rating-service"><span>Service</span> <div class="stars-right" id="stars-service"></div></div>
-                    <div class="rating-row" id="row-rating-ambiance"><span>Ambiance</span> <div class="stars-right" id="stars-ambiance"></div></div>
-                    <div class="rating-row"><span>Overall</span> <div class="stars-right" id="stars-overall"></div></div>
+                <div id="photo-carousel-wrapper" class="carousel-container m-area-images">
+                    <button class="carousel-btn prev" onclick="scrollCarousel(-1)"><i
+                            class="fas fa-chevron-left"></i></button>
+                    <div id="m-carousel-track" class="carousel-track">
+                    </div>
+                    <button class="carousel-btn next" onclick="scrollCarousel(1)"><i
+                            class="fas fa-chevron-right"></i></button>
                 </div>
 
-                <div id="link-section">
+                <div class="m-area-content">
                     <hr class="modal-divider">
-                    <h3>Quick Links to Videos</h3>
-                    <div class="quick-links-row">
-                        <a id="link-insta" href="#" target="_blank" class="video-link-card">
-                            <div class="video-icon instagram"><i class="fab fa-instagram"></i></div>
-                            <div><strong>Instagram</strong><br><small>Reel</small></div>
-                        </a>
-                        <a id="link-tiktok" href="#" target="_blank" class="video-link-card">
-                            <div class="video-icon tiktok"><i class="fab fa-tiktok"></i></div>
-                            <div><strong>Tik Tok</strong><br><small>Video</small></div>
-                        </a>
+
+                    <div class="modal-meta-grid">
+                        <div class="meta-row" id="row-date"><strong>Date Visited:</strong> <span id="m-date"></span>
+                        </div>
+                        <div class="meta-row" id="row-cuisine"><strong>Cuisine:</strong> <span id="m-cuisine"></span>
+                        </div>
+                        <div class="meta-row" id="row-price"><strong>Price:</strong> $<span id="m-price"></span></div>
+                        <div class="meta-row description-box" id="row-desc"><strong>Description:</strong>
+                            <p id="m-desc"></p>
+                        </div>
+                    </div>
+
+                    <hr class="modal-divider">
+
+                    <h3>Rating Breakdown</h3>
+                    <div class="rating-breakdown">
+                        <div class="rating-row" id="row-rating-food"><span>Food</span>
+                            <div class="stars-right" id="stars-food"></div>
+                        </div>
+                        <div class="rating-row" id="row-rating-service"><span>Service</span>
+                            <div class="stars-right" id="stars-service"></div>
+                        </div>
+                        <div class="rating-row" id="row-rating-ambiance"><span>Ambiance</span>
+                            <div class="stars-right" id="stars-ambiance"></div>
+                        </div>
+                        <div class="rating-row"><span>Overall</span>
+                            <div class="stars-right" id="stars-overall"></div>
+                        </div>
+                    </div>
+
+                    <div id="link-section">
+                        <hr class="modal-divider">
+                        <h3>Quick Links to Videos</h3>
+                        <div class="quick-links-row">
+                            <a id="link-insta" href="#" target="_blank" class="video-link-card">
+                                <div class="video-icon instagram"><i class="fab fa-instagram"></i></div>
+                                <div><strong>Instagram</strong><br><small>Reel</small></div>
+                            </a>
+                            <a id="link-tiktok" href="#" target="_blank" class="video-link-card">
+                                <div class="video-icon tiktok"><i class="fab fa-tiktok"></i></div>
+                                <div><strong>Tik Tok</strong><br><small>Video</small></div>
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
 
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    function openModal(card) {
-        const d = card.dataset;
+    <script>
+        function openModal(card) {
+            const d = card.dataset;
 
-        document.getElementById('m-place').innerText = d.place;
-        updateField('row-date', 'm-date', d.date);
-        updateField('row-cuisine', 'm-cuisine', d.cuisine);
-        updateField('row-price', 'm-price', d.price);
-        updateField('row-desc', 'm-desc', d.desc);
+            document.getElementById('m-place').innerText = d.place;
+            updateField('row-date', 'm-date', d.date);
+            updateField('row-cuisine', 'm-cuisine', d.cuisine);
+            updateField('row-price', 'm-price', d.price);
+            updateField('row-desc', 'm-desc', d.desc);
 
-        renderStars('m-main-stars', d.rating);
-        renderStars('stars-overall', d.rating);
-        updateRatingRow('row-rating-food', 'stars-food', d.food);
-        updateRatingRow('row-rating-service', 'stars-service', d.service);
-        updateRatingRow('row-rating-ambiance', 'stars-ambiance', d.ambiance);
+            renderStars('m-main-stars', d.rating);
+            renderStars('stars-overall', d.rating);
+            updateRatingRow('row-rating-food', 'stars-food', d.food);
+            updateRatingRow('row-rating-service', 'stars-service', d.service);
+            updateRatingRow('row-rating-ambiance', 'stars-ambiance', d.ambiance);
 
-        const carouselWrapper = document.getElementById('photo-carousel-wrapper');
-        const track = document.getElementById('m-carousel-track');
-        track.innerHTML = ''; 
+            const carouselWrapper = document.getElementById('photo-carousel-wrapper');
+            const track = document.getElementById('m-carousel-track');
+            track.innerHTML = '';
 
-        if (d.photos && d.photos.length > 0) {
-            carouselWrapper.style.display = 'block';
-            
-            const urls = d.photos.split(',');
-            urls.forEach(url => {
-                const img = document.createElement('img');
-                img.src = url;
-                track.appendChild(img);
-            });
+            if (d.photos && d.photos.length > 0) {
+                carouselWrapper.style.display = 'block';
 
-            const btns = carouselWrapper.querySelectorAll('.carousel-btn');
-            if(urls.length <= 1) {
-                btns.forEach(b => b.style.display = 'none');
+                const urls = d.photos.split(',');
+                urls.forEach(url => {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    track.appendChild(img);
+                });
+
+                const btns = carouselWrapper.querySelectorAll('.carousel-btn');
+                if (urls.length <= 1) {
+                    btns.forEach(b => b.style.display = 'none');
+                } else {
+                    btns.forEach(b => b.style.display = 'flex');
+                }
+
             } else {
-                btns.forEach(b => b.style.display = 'flex'); 
+                carouselWrapper.style.display = 'none';
             }
 
-        } else {
-            carouselWrapper.style.display = 'none';
-        }
+            const instaBtn = document.getElementById('link-insta');
+            const tiktokBtn = document.getElementById('link-tiktok');
+            const section = document.getElementById('link-section');
+            let hasAnyLink = false;
 
-        const instaBtn = document.getElementById('link-insta');
-        const tiktokBtn = document.getElementById('link-tiktok');
-        const section = document.getElementById('link-section');
-        let hasAnyLink = false;
-
-        if (d.insta && d.insta !== 'null' && d.insta !== '') {
-            instaBtn.style.display = 'flex';
-            instaBtn.href = d.insta;
-            hasAnyLink = true;
-        } else {
-            instaBtn.style.display = 'none';
-        }
-
-        if (d.tiktok && d.tiktok !== 'null' && d.tiktok !== '') {
-            tiktokBtn.style.display = 'flex';
-            tiktokBtn.href = d.tiktok;
-            hasAnyLink = true;
-        } else {
-            tiktokBtn.style.display = 'none';
-        }
-
-        if (hasAnyLink) {
-            section.style.display = 'block';
-        } else {
-            section.style.display = 'none';
-        }
-
-        document.getElementById('reviewModal').classList.add('active');
-    }
-
-    function scrollCarousel(direction) {
-        const track = document.getElementById('m-carousel-track');
-        const scrollAmount = track.clientWidth * direction;
-        track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    }
-
-    function closeModal(event) {
-        document.getElementById('reviewModal').classList.remove('active');
-    }
-
-    function updateField(rowId, textId, value) {
-        const row = document.getElementById(rowId);
-        if (!value || value === 'null') {
-            row.style.display = 'none';
-        } else {
-            row.style.display = 'block';
-            document.getElementById(textId).innerText = value;
-        }
-    }
-
-    function updateRatingRow(rowId, starContainerId, value) {
-        const row = document.getElementById(rowId);
-        if (!value || value === 'null' || value == 0) {
-            row.style.display = 'none';
-        } else {
-            row.style.display = 'flex';
-            renderStars(starContainerId, value);
-        }
-    }
-
-    function renderStars(containerId, rawScore) {
-        if (!rawScore) return;
-        const score5 = rawScore / 2;
-        let html = '';
-        const fullStars = Math.floor(score5);
-        const hasHalf = (score5 - fullStars) >= 0.5;
-
-        for(let i=0; i<fullStars; i++) {
-            html += '<i class="fas fa-star" style="color: #e5c100; margin-right: 2px;"></i>';
-        }
-        if (hasHalf) {
-            html += '<i class="fas fa-star-half-alt" style="color: #e5c100; margin-right: 2px;"></i>';
-        }
-        
-        html += `<span style="color:#888; font-size:0.8rem; margin-left:5px;">(${rawScore})</span>`;
-        document.getElementById(containerId).innerHTML = html;
-    }
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const starGroups = document.querySelectorAll('.star-group');
-        starGroups.forEach(group => {
-            const score10 = parseFloat(group.getAttribute('data-score')); 
-            if (!isNaN(score10)) {
-                const score5 = score10 / 2; 
-                group.innerHTML = generateStarHTML(score5);
+            if (d.insta && d.insta !== 'null' && d.insta !== '') {
+                instaBtn.style.display = 'flex';
+                instaBtn.href = d.insta;
+                hasAnyLink = true;
+            } else {
+                instaBtn.style.display = 'none';
             }
+
+            if (d.tiktok && d.tiktok !== 'null' && d.tiktok !== '') {
+                tiktokBtn.style.display = 'flex';
+                tiktokBtn.href = d.tiktok;
+                hasAnyLink = true;
+            } else {
+                tiktokBtn.style.display = 'none';
+            }
+
+            if (hasAnyLink) {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+
+            document.getElementById('reviewModal').classList.add('active');
+        }
+
+        function scrollCarousel(direction) {
+            const track = document.getElementById('m-carousel-track');
+            const scrollAmount = track.clientWidth * direction;
+            track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+
+        function closeModal(event) {
+            document.getElementById('reviewModal').classList.remove('active');
+        }
+
+        function updateField(rowId, textId, value) {
+            const row = document.getElementById(rowId);
+            if (!value || value === 'null') {
+                row.style.display = 'none';
+            } else {
+                row.style.display = 'block';
+                document.getElementById(textId).innerText = value;
+            }
+        }
+
+        function updateRatingRow(rowId, starContainerId, value) {
+            const row = document.getElementById(rowId);
+            if (!value || value === 'null' || value == 0) {
+                row.style.display = 'none';
+            } else {
+                row.style.display = 'flex';
+                renderStars(starContainerId, value);
+            }
+        }
+
+        function renderStars(containerId, rawScore) {
+            if (!rawScore) return;
+            const score5 = rawScore / 2;
+            let html = '';
+            const fullStars = Math.floor(score5);
+            const hasHalf = (score5 - fullStars) >= 0.5;
+
+            for (let i = 0; i < fullStars; i++) {
+                html += '<i class="fas fa-star" style="color: #e5c100; margin-right: 2px;"></i>';
+            }
+            if (hasHalf) {
+                html += '<i class="fas fa-star-half-alt" style="color: #e5c100; margin-right: 2px;"></i>';
+            }
+
+            html += `<span style="color:#888; font-size:0.8rem; margin-left:5px;">(${rawScore})</span>`;
+            document.getElementById(containerId).innerHTML = html;
+        }
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const starGroups = document.querySelectorAll('.star-group');
+            starGroups.forEach(group => {
+                const score10 = parseFloat(group.getAttribute('data-score'));
+                if (!isNaN(score10)) {
+                    const score5 = score10 / 2;
+                    group.innerHTML = generateStarHTML(score5);
+                }
+            });
         });
-    });
 
-    function generateStarHTML(rating) {
-        let html = '';
-        const fullStars = Math.floor(rating); 
-        const hasHalf = (rating - fullStars) >= 0.5; 
-        
-        for (let i = 0; i < fullStars; i++) {
-            html += '<i class="fas fa-star" style="color: #e5c100;"></i>';
+        function generateStarHTML(rating) {
+            let html = '';
+            const fullStars = Math.floor(rating);
+            const hasHalf = (rating - fullStars) >= 0.5;
+
+            for (let i = 0; i < fullStars; i++) {
+                html += '<i class="fas fa-star" style="color: #e5c100;"></i>';
+            }
+            if (hasHalf) {
+                html += '<i class="fas fa-star-half-alt" style="color: #e5c100;"></i>';
+            }
+            return html;
         }
-        if (hasHalf) {
-            html += '<i class="fas fa-star-half-alt" style="color: #e5c100;"></i>';
-        }
-        return html;
-    }
-</script>
+    </script>
 
 </body>
+
 </html>

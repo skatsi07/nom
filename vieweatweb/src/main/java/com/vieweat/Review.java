@@ -15,14 +15,13 @@ public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Every review gets a unique ID
+    private Long id; 
 
-    // --- THE LINK TO THE USER ---
-    @ManyToOne // Many reviews can belong to One user
-    @JoinColumn(name = "user_id", nullable = false) // This creates a "Foreign Key" column in the DB
+    @ManyToOne 
+    @JoinColumn(name = "user_id", nullable = false) 
     private User user;
 
-    // --- 1. MANDATORY FIELDS ---
+    // --- MANDATORY FIELDS ---
     @Column(unique = false, nullable = false)
     private Double overallRating;
 
@@ -32,7 +31,7 @@ public class Review {
     @Column(unique = false, nullable = false)
     private String date;
 
-    // --- 2. OPTIONAL FIELDS ---
+    // --- OPTIONAL FIELDS ---
     private Float pricePerPerson;
     private String cuisine;
     private String instagramUrl;
@@ -41,18 +40,17 @@ public class Review {
     @Column(columnDefinition = "TEXT")
     private String overallDesc;
 
-    // --- 3. OPTIONAL SCORES ---
     private Double foodScore;
     private Double serviceScore;
     private Double ambianceScore;
 
-    // --- 4. LIST ---
     @Builder.Default 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
     private List<FoodItem> foodItems = new ArrayList<>();
 
-    // --- 5. PHOTOS (One Review -> Many Photos) ---
+    // --- PHOTOS ---
     @Builder.Default
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderColumn(name = "photo_order") 
     private List<ReviewPhoto> photos = new ArrayList<>();
 }

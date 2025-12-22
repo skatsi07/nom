@@ -12,48 +12,40 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 public class ProfileController {
 
-  private final ReviewRepository reviewRepository;
-  private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
 
-  // --- 1. HOME PAGE (Recent 5 Reviews) ---
-  @GetMapping("/")
-  public String home(Model model) {
-      // 1. Fetch YOUR profile info first
-      User myProfile = userRepository.findByUsername("skatsi07");
+    // --- 1. HOME PAGE (Recent 5 Reviews) ---
+    @GetMapping("/")
+    public String home(Model model) {
+        User myProfile = userRepository.findByUsername("skatsi07");
+        List<Review> myReviews = reviewRepository.findTop5ByUserOrderByDateDesc(myProfile);
 
-      // 2. Fetch the reviews specifically linked to YOU
-      List<Review> myReviews = reviewRepository.findTop5ByUserOrderByDateDesc(myProfile);
-      
-      model.addAttribute("reviews", myReviews);
-      model.addAttribute("user", myProfile);
-      
-      return "profile";
-  }
+        model.addAttribute("reviews", myReviews);
+        model.addAttribute("user", myProfile);
 
-  // --- 2. ALL REVIEWS PAGE ---
-  @GetMapping("/reviews")
-  public String getAllReviews(Model model) {
-      
-      // 1. Fetch YOUR profile (So the header knows who you are)
-      User myProfile = userRepository.findByUsername("skatsi07");
+        return "profile";
+    }
 
-      // 2. Fetch ALL reviews specifically linked to YOU
-      // (Using the new method we just created)
-      List<Review> allReviews = reviewRepository.findAllByUserOrderByDateDesc(myProfile);
+    // --- 2. ALL REVIEWS PAGE ---
+    @GetMapping("/reviews")
+    public String getAllReviews(Model model) {
+        User myProfile = userRepository.findByUsername("skatsi07");
+        List<Review> allReviews = reviewRepository.findAllByUserOrderByDateDesc(myProfile);
 
-      // 3. Add data to the model so HTML can use it
-      model.addAttribute("reviews", allReviews);
-      model.addAttribute("user", myProfile); // Passing 'user' makes the header dynamic
-      
-      return "all-reviews";
-  }
+        model.addAttribute("reviews", allReviews);
+        model.addAttribute("user", myProfile);
+
+        return "all-reviews";
+    }
 
     // --- 3a. GET: Show the Form ---
     @GetMapping("/add")
@@ -62,174 +54,272 @@ public class ProfileController {
         return "add-review";
     }
 
-  // --- 3b. POST: Save the Form ---
-  @PostMapping("/add")
-  public String addReview(
-          @ModelAttribute Review review,
-          @RequestParam("reviewImages") MultipartFile[] files) throws IOException { // 1. Accept files array
-    
-    // A. FIND USER & LINK
-    User currentUser = userRepository.findByUsername("skatsi07");
-    review.setUser(currentUser);
+    // --- 3b. POST: Save the Form ---
+    // --- 3b. POST: Save the Form ---
+    @PostMapping("/add")
+    public String addReview(
+            @ModelAttribute Review review,
+            @RequestParam("reviewImages") MultipartFile[] filesArray,
+            @RequestParam(value = "coverImageIndex", defaultValue = "0") int coverIndex,
+            // NEW: Receive indices to skip
+            @RequestParam(value = "skippedImageIndices", required = false) String skippedIndicesStr) throws IOException {
 
-    // B. CLEAN FOOD ITEMS (Remove blanks)
-    review.getFoodItems().removeIf(item -> item.getName() == null || item.getName().trim().isEmpty());
-    for (FoodItem item : review.getFoodItems()) {
-        item.setReview(review);
-    }
-    
-    // C. SAVE REVIEW FIRST (Crucial step!)
-    // We must save it now to generate the 'id' (e.g., 50) needed for the folder name
-    Review savedReview = reviewRepository.save(review);
+        // --- A. FILTER & REORDER IMAGES ---
+        
+        // 1. Create a "Working List" excluding skipped files
+        List<MultipartFile> validFiles = new ArrayList<>();
+        List<Integer> skippedIndices = new ArrayList<>();
 
-    // D. PROCESS PHOTOS (If any)
-    if (files != null && files.length > 0) {
-        for (MultipartFile file : files) {
-            if (!file.isEmpty()) {
-                String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-                
-                // 1. Create the database object
-                ReviewPhoto photo = new ReviewPhoto();
-                photo.setPhotoUrl("/review-photos/" + savedReview.getId() + "/" + fileName);
-                photo.setReview(savedReview); // Link back to review
-                
-                // 2. Add to the list
-                savedReview.getPhotos().add(photo);
+        if (skippedIndicesStr != null && !skippedIndicesStr.isEmpty()) {
+            skippedIndices = Arrays.stream(skippedIndicesStr.split(","))
+                                   .map(String::trim)
+                                   .map(Integer::parseInt)
+                                   .toList();
+        }
 
-                // 3. Save file to Hard Drive (review-photos/50/pizza.jpg)
-                String uploadDir = "review-photos/" + savedReview.getId();
-                FileUploadUtil.saveFile(uploadDir, fileName, file);
+        // Only add files that are NOT in the skipped list
+        for (int i = 0; i < filesArray.length; i++) {
+            if (!skippedIndices.contains(i)) {
+                validFiles.add(filesArray[i]);
             }
         }
-        // Save again to update the photos list in DB
-        reviewRepository.save(savedReview);
+
+        // 2. Handle Cover Image Logic (If cover wasn't deleted)
+        // We need to map the "Original Index" (from HTML) to the "New List Index"
+        if (!validFiles.isEmpty() && coverIndex >= 0 && !skippedIndices.contains(coverIndex)) {
+            MultipartFile selectedCover = filesArray[coverIndex];
+            
+            // Remove it from wherever it ended up in validFiles
+            validFiles.remove(selectedCover); 
+            // Add it to the front
+            validFiles.add(0, selectedCover);
+        }
+
+        // --- B. STANDARD SAVE LOGIC ---
+
+        User currentUser = userRepository.findByUsername("skatsi07");
+        review.setUser(currentUser);
+
+        if (review.getFoodItems() != null) {
+            review.getFoodItems().removeIf(item -> item.getName() == null || item.getName().trim().isEmpty());
+            for (FoodItem item : review.getFoodItems()) {
+                item.setReview(review);
+            }
+        }
+
+        Review savedReview = reviewRepository.save(review);
+
+        // Process final list
+        if (!validFiles.isEmpty()) {
+            for (MultipartFile file : validFiles) {
+                if (file != null && !file.isEmpty() && file.getOriginalFilename() != null) {
+                    String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+
+                    ReviewPhoto photo = new ReviewPhoto();
+                    photo.setPhotoUrl("/review-photos/" + savedReview.getId() + "/" + fileName);
+                    photo.setReview(savedReview); 
+
+                    if (savedReview.getPhotos() == null) {
+                        savedReview.setPhotos(new ArrayList<>());
+                    }
+                    savedReview.getPhotos().add(photo);
+
+                    String uploadDir = "review-photos/" + savedReview.getId();
+                    FileUploadUtil.saveFile(uploadDir, fileName, file);
+                }
+            }
+            reviewRepository.save(savedReview);
+        }
+
+        return "redirect:/";
     }
-    return "redirect:/";
-  }
 
-  // --- 4. HIDDEN EDIT PROFILE PAGE ---
-  @GetMapping("/edit-profile")
-  public String showEditProfile(Model model) {
-      // Fetch 'You' so we can fill the form with your current bio/pic
-      User user = userRepository.findByUsername("skatsi07");
-      model.addAttribute("user", user);
-      return "edit-profile";
-  }
-
-  // --- 6. HANDLE THE UPLOAD ---
-  @PostMapping("/edit-profile/save")
-  public String saveProfile(
-        @ModelAttribute User user,
-        @RequestParam("image") MultipartFile multipartFile) throws IOException {
-    
-    // 1. Fetch the real user from DB (to prevent ID tampering)
-    User existingUser = userRepository.findByUsername("skatsi07");
-
-    // 2. Update Bio
-    existingUser.setBio(user.getBio());
-
-    // 3. Handle Image Upload (If they chose one)
-    if (!multipartFile.isEmpty()) {
-        String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
-        
-        // Set the path that the HTML will use to find the image
-        existingUser.setProfilePicUrl("/user-photos/" + existingUser.getId() + "/" + fileName);
-
-        // Save the actual file to your project folder: user-photos/{id}/
-        String uploadDir = "user-photos/" + existingUser.getId();
-        FileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
+    // --- 4. HIDDEN EDIT PROFILE PAGE ---
+    @GetMapping("/edit-profile")
+    public String showEditProfile(Model model) {
+        User user = userRepository.findByUsername("skatsi07");
+        model.addAttribute("user", user);
+        return "edit-profile";
     }
 
-    userRepository.save(existingUser);
+    // --- 6. HANDLE THE UPLOAD ---
+    @PostMapping("/edit-profile/save")
+    public String saveProfile(
+            @ModelAttribute User user,
+            @RequestParam("image") MultipartFile multipartFile) throws IOException {
 
-    return "redirect:/";
-  }
+        User existingUser = userRepository.findByUsername("skatsi07");
+        existingUser.setBio(user.getBio());
 
-  // --- 5. SHOW LIST OF REVIEWS TO MANAGE ---
-  @GetMapping("/manage-reviews")
-  public String manageReviews(Model model) {
-      User currentUser = userRepository.findByUsername("skatsi07");
-      
-      // Re-use the method we made earlier to find all reviews
-      List<Review> myReviews = reviewRepository.findAllByUserOrderByDateDesc(currentUser);
-      
-      model.addAttribute("reviews", myReviews);
-      return "manage-reviews";
-  }
+        if (!multipartFile.isEmpty()) {
+            String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
+            existingUser.setProfilePicUrl("/user-photos/" + existingUser.getId() + "/" + fileName);
+            String uploadDir = "user-photos/" + existingUser.getId();
+            FileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
+        }
 
-  // --- 6. SHOW THE EDIT FORM (PRE-FILLED) ---
-  @GetMapping("/edit/{id}")
-  public String showEditForm(@PathVariable("id") Long id, Model model) {
-      // Find the review by ID
-      Review review = reviewRepository.findById(id)
-              .orElseThrow(() -> new IllegalArgumentException("Invalid review Id:" + id));
-      
-      // Verify it belongs to skatsi07 (Security Check)
-      if (!review.getUser().getUsername().equals("skatsi07")) {
-          return "redirect:/manage-reviews"; // Block access if it's not yours
-      }
+        userRepository.save(existingUser);
+        return "redirect:/";
+    }
 
-      model.addAttribute("review", review);
-      return "edit-review";
-  }
+    // --- 5. SHOW LIST OF REVIEWS TO MANAGE ---
+    @GetMapping("/manage-reviews")
+    public String manageReviews(Model model) {
+        User currentUser = userRepository.findByUsername("skatsi07");
+        List<Review> myReviews = reviewRepository.findAllByUserOrderByDateDesc(currentUser);
+        model.addAttribute("reviews", myReviews);
+        return "manage-reviews";
+    }
 
-  // --- 7. HANDLE THE UPDATE ---
-  @PostMapping("/update")
-  public String updateReview(
-          @ModelAttribute Review formReview,
-          @RequestParam("reviewImages") MultipartFile[] files) throws IOException {
+    // --- 6. SHOW THE EDIT FORM ---
+    @GetMapping("/edit/{id}")
+    public String showEditForm(@PathVariable("id") Long id, Model model) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid review Id:" + id));
 
-      // 1. Fetch the EXISTING review from DB using the ID
-      // We do this to ensure we don't lose the User link or existing photos
-      Review existingReview = reviewRepository.findById(formReview.getId())
-              .orElseThrow(() -> new IllegalArgumentException("Invalid review Id"));
+        if (!review.getUser().getUsername().equals("skatsi07")) {
+            return "redirect:/manage-reviews";
+        }
 
-      // 2. Update Basic Fields
-      existingReview.setPlaceName(formReview.getPlaceName());
-      existingReview.setDate(formReview.getDate());
-      existingReview.setOverallRating(formReview.getOverallRating());
-      existingReview.setCuisine(formReview.getCuisine());
-      existingReview.setPricePerPerson(formReview.getPricePerPerson());
-      existingReview.setOverallDesc(formReview.getOverallDesc());
-      existingReview.setFoodScore(formReview.getFoodScore());
-      existingReview.setServiceScore(formReview.getServiceScore());
-      existingReview.setAmbianceScore(formReview.getAmbianceScore());
-      existingReview.setInstagramUrl(formReview.getInstagramUrl());
-      existingReview.setTiktokUrl(formReview.getTiktokUrl());
+        model.addAttribute("review", review);
+        return "edit-review";
+    }
 
-      // 3. Update Food Items
-      // We clear the old list and re-add the ones from the form to handle updates/additions
-      // Note: This works because we included hidden IDs in the HTML form
-      existingReview.getFoodItems().clear();
-      if (formReview.getFoodItems() != null) {
-          formReview.getFoodItems().removeIf(item -> item.getName() == null || item.getName().trim().isEmpty());
-          for (FoodItem item : formReview.getFoodItems()) {
-              item.setReview(existingReview); // Re-link to parent
-              existingReview.getFoodItems().add(item);
-          }
-      }
+    // --- 7. HANDLE THE UPDATE (FIXED FOR HIBERNATE ERROR) ---
+    @PostMapping("/update")
+    public String updateReview(
+            @ModelAttribute Review formReview,
+            @RequestParam("reviewImages") MultipartFile[] files,
+            @RequestParam(value = "coverSelectionType", defaultValue = "none") String coverType,
+            @RequestParam(value = "selectedExistingCoverId", required = false) Long existingCoverId,
+            @RequestParam(value = "selectedNewCoverIndex", required = false) Integer newCoverIndex,
+            // NEW PARAMETER for deletions
+            @RequestParam(value = "deletedPhotoIds", required = false) String deletedPhotoIdsStr) throws IOException {
 
-      // 4. Handle NEW Photos (Append to existing list)
-      if (files != null && files.length > 0) {
-          for (MultipartFile file : files) {
-              if (!file.isEmpty()) {
-                  String fileName = StringUtils.cleanPath(file.getOriginalFilename());
-                  
-                  ReviewPhoto photo = new ReviewPhoto();
-                  photo.setPhotoUrl("/review-photos/" + existingReview.getId() + "/" + fileName);
-                  photo.setReview(existingReview);
-                  
-                  existingReview.getPhotos().add(photo);
+        // 1. Fetch Existing Review
+        Review existingReview = reviewRepository.findById(formReview.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid review Id"));
 
-                  String uploadDir = "review-photos/" + existingReview.getId();
-                  FileUploadUtil.saveFile(uploadDir, fileName, file);
-              }
-          }
-      }
+        // 2. Update Standard Fields
+        existingReview.setPlaceName(formReview.getPlaceName());
+        existingReview.setDate(formReview.getDate());
+        existingReview.setOverallRating(formReview.getOverallRating());
+        existingReview.setCuisine(formReview.getCuisine());
+        existingReview.setPricePerPerson(formReview.getPricePerPerson());
+        existingReview.setOverallDesc(formReview.getOverallDesc());
+        existingReview.setFoodScore(formReview.getFoodScore());
+        existingReview.setServiceScore(formReview.getServiceScore());
+        existingReview.setAmbianceScore(formReview.getAmbianceScore());
+        existingReview.setInstagramUrl(formReview.getInstagramUrl());
+        existingReview.setTiktokUrl(formReview.getTiktokUrl());
 
-      // 5. Save updates
-      reviewRepository.save(existingReview);
+        // 3. Update Food Items
+        existingReview.getFoodItems().clear();
+        if (formReview.getFoodItems() != null) {
+            formReview.getFoodItems().removeIf(item -> item.getName() == null || item.getName().trim().isEmpty());
+            for (FoodItem item : formReview.getFoodItems()) {
+                item.setReview(existingReview);
+                existingReview.getFoodItems().add(item);
+            }
+        }
 
-      return "redirect:/manage-reviews";
-  }
+        // --- 4. PHOTO LOGIC ---
+
+        // Start by making a COPY of the current DB photos
+        List<ReviewPhoto> currentDbPhotos = new ArrayList<>(existingReview.getPhotos());
+
+        // A. REMOVE DELETED PHOTOS (NEW LOGIC)
+        // If the user clicked 'X' on any photos, remove them from our working list
+        if (deletedPhotoIdsStr != null && !deletedPhotoIdsStr.isEmpty()) {
+            List<Long> idsToRemove = Arrays.stream(deletedPhotoIdsStr.split(","))
+                    .map(String::trim)
+                    .map(Long::parseLong)
+                    .toList();
+
+            currentDbPhotos.removeIf(p -> idsToRemove.contains(p.getId()));
+        }
+
+        // B. Handle "Existing Photo Selected as Cover"
+        List<ReviewPhoto> tempPhotoList = new ArrayList<>();
+
+        if ("existing".equals(coverType) && existingCoverId != null) {
+            ReviewPhoto selectedCover = currentDbPhotos.stream()
+                    .filter(p -> p.getId().equals(existingCoverId))
+                    .findFirst()
+                    .orElse(null);
+
+            if (selectedCover != null) {
+                tempPhotoList.add(selectedCover); // Add cover first
+                currentDbPhotos.remove(selectedCover); // Remove so it's not added again later
+            }
+        }
+
+        // C. Add remaining existing photos
+        tempPhotoList.addAll(currentDbPhotos);
+
+        // D. Handle New Uploads
+        if (files != null && files.length > 0) {
+            List<MultipartFile> fileList = new ArrayList<>(Arrays.asList(files));
+            fileList.removeIf(MultipartFile::isEmpty);
+
+            if (!fileList.isEmpty()) {
+                MultipartFile coverFile = null;
+
+                if ("new".equals(coverType) && newCoverIndex != null
+                        && newCoverIndex >= 0 && newCoverIndex < fileList.size()) {
+                    coverFile = fileList.get(newCoverIndex);
+                    fileList.remove((int) newCoverIndex);
+                }
+
+                if (coverFile != null) {
+                    ReviewPhoto photo = saveFileToReview(coverFile, existingReview);
+                    tempPhotoList.add(0, photo); // Insert at absolute beginning
+                }
+
+                for (MultipartFile f : fileList) {
+                    ReviewPhoto photo = saveFileToReview(f, existingReview);
+                    tempPhotoList.add(photo);
+                }
+            }
+        }
+
+        // E. Update DB (Clear and Refill to keep order)
+        existingReview.getPhotos().clear();
+        existingReview.getPhotos().addAll(tempPhotoList);
+
+        reviewRepository.save(existingReview);
+
+        return "redirect:/manage-reviews";
+    }
+
+    // Helper method to save file and create object
+    private ReviewPhoto saveFileToReview(MultipartFile file, Review review) throws IOException {
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+
+        ReviewPhoto photo = new ReviewPhoto();
+        photo.setPhotoUrl("/review-photos/" + review.getId() + "/" + fileName);
+        photo.setReview(review);
+
+        String uploadDir = "review-photos/" + review.getId();
+        FileUploadUtil.saveFile(uploadDir, fileName, file);
+
+        return photo;
+    }
+
+    // --- 8. DELETE REVIEW ---
+    @GetMapping("/delete/{id}")
+    public String deleteReview(@PathVariable("id") Long id) {
+
+        // 1. Find the review
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid review Id:" + id));
+
+        // 2. Security Check (Only allow skatsi07 to delete)
+        if (review.getUser().getUsername().equals("skatsi07")) {
+            reviewRepository.delete(review);
+        }
+
+        // 3. Redirect back to the list
+        return "redirect:/manage-reviews";
+    }
 }

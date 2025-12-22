@@ -6,6 +6,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="/css/style.css">
+  
+  <style>
+      /* Keep your existing styles */
+      .image-preview-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+          gap: 10px;
+          margin-top: 15px;
+      }
+      .preview-item {
+          position: relative;
+          aspect-ratio: 1;
+          border-radius: 8px;
+          overflow: hidden;
+          cursor: pointer;
+          border: 3px solid transparent;
+          transition: all 0.2s;
+      }
+      .preview-item img {
+          width: 100%; height: 100%; object-fit: cover;
+      }
+      .preview-item.selected {
+          border-color: #000;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      }
+      .cover-badge {
+          position: absolute; bottom: 0; left: 0; width: 100%;
+          background: rgba(0,0,0,0.7); color: white;
+          font-size: 0.7rem; text-align: center; padding: 4px; display: none;
+      }
+      .preview-item.selected .cover-badge { display: block; }
+  </style>
 </head>
 <body>
 
@@ -24,21 +56,21 @@
         <form th:action="@{/add}" th:object="${review}" method="post" enctype="multipart/form-data" 
                 style="display: flex; flex-direction: column; gap: 20px;">
             
+            <input type="hidden" name="coverImageIndex" id="coverImageIndex" value="0">
+            <input type="hidden" name="skippedImageIndices" id="skippedImageIndices" value="">
+
             <div style="background: #fff; padding: 5px 0;">
                 <h3 style="font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">The Basics</h3>
-
                 <div class="form-group">
                     <label>Place Name *</label>
                     <input type="text" th:field="*{placeName}" required placeholder="e.g. Joe's Pizza" 
                            style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
                 </div>
-
                 <div class="form-group" style="margin-top: 15px;">
                     <label>Date Visited *</label>
                     <input type="date" th:field="*{date}" required 
                            style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
                 </div>
-
                 <div style="display: flex; gap: 10px; margin-top: 15px;">
                     <div style="flex: 1;">
                         <label style="font-size: 0.9rem;">Cuisine</label>
@@ -53,32 +85,26 @@
                 </div>
             </div>
 
-
             <div>
                 <h3 style="font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">The Ratings</h3>
-                
                 <div class="form-group">
                     <label>Overall Rating (e.g. 7.5) *</label>
                     <input type="number" step="0.1" min="0" max="10" th:field="*{overallRating}" required 
                            placeholder="0.0 - 10.0"
                            style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;">
                 </div>
-
                 <p style="font-size: 0.85rem; color: #666; margin: 15px 0 5px;">Category Breakdown</p>
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                    
                     <div>
                         <label style="font-size: 0.8rem;">Food</label>
                         <input type="number" step="0.1" min="0" max="10" th:field="*{foodScore}" placeholder="-"
                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px;">
                     </div>
-                    
                     <div>
                         <label style="font-size: 0.8rem;">Service</label>
                         <input type="number" step="0.1" min="0" max="10" th:field="*{serviceScore}" placeholder="-"
                                style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px;">
                     </div>
-                    
                     <div>
                         <label style="font-size: 0.8rem;">Ambiance</label>
                         <input type="number" step="0.1" min="0" max="10" th:field="*{ambianceScore}" placeholder="-"
@@ -87,16 +113,13 @@
                 </div>
             </div>
 
-
             <div>
                 <h3 style="font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">The Details</h3>
-
                 <div class="form-group">
                     <label>My Review</label>
                     <textarea th:field="*{overallDesc}" rows="5" placeholder="How was the experience? What stood out?"
                               style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Inter';"></textarea>
                 </div>
-
                 <div class="form-group" style="margin-top: 15px;">
                     <label>Social Links (Paste URL)</label>
                     <input type="text" th:field="*{instagramUrl}" placeholder="Instagram Reel URL" 
@@ -106,12 +129,9 @@
                 </div>
             </div>
 
-
             <div>
                 <h3 style="font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">Specific Dishes</h3>
-                
                 <div id="food-items-container" style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 15px;"></div>
-
                 <button type="button" onclick="addFoodItem()" class="btn-outline" style="border-style: dashed; color: #555;">
                     <i class="fas fa-plus"></i> Add a Dish
                 </button>
@@ -119,12 +139,18 @@
 
             <div>
                 <h3 style="font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">Photos</h3>
-                
                 <div class="form-group">
-                    <label>Upload Photos (Optional)</label>
-                    <input type="file" name="reviewImages" multiple accept="image/png, image/jpeg"
+                    <label>Upload Photos</label>
+                    
+                    <input type="file" id="imageInput" name="reviewImages" multiple accept="image/png, image/jpeg"
+                           onchange="handleFileSelect(event)"
                            style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff;">
-                    <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">Hold Ctrl (Windows) or Cmd (Mac) to select multiple files.</p>
+                    
+                    <p style="font-size: 0.8rem; color: #888; margin-top: 5px;">
+                        Select multiple files. Click an image below to set it as the <strong>Cover Photo</strong>.
+                    </p>
+
+                    <div id="imagePreviewContainer" class="image-preview-grid"></div>
                 </div>
             </div>
 
@@ -142,32 +168,102 @@
 
     function addFoodItem() {
         const container = document.getElementById('food-items-container');
-        
-        // This HTML must match the FoodItem class structure
         const rowHtml = `
             <div class="food-item-row" style="background: #f9f9f9; padding: 15px; border-radius: 12px; border: 1px solid #eee; position: relative;">
-                
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <strong style="color: #555;">Dish #${itemIndex + 1}</strong>
                     <i class="fas fa-times" style="color: #ccc; cursor: pointer;" onclick="this.closest('.food-item-row').remove()"></i>
                 </div>
-                
                 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                    <input type="text" name="foodItems[${itemIndex}].name" placeholder="Dish Name (e.g. Calamari)" 
-                           required
-                           style="flex: 2; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
-                    
-                    <input type="number" step="0.1" min="0" max="10" name="foodItems[${itemIndex}].rating" placeholder="Score (0-10)" 
-                            style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    <input type="text" name="foodItems[${itemIndex}].name" placeholder="Dish Name" required style="flex: 2; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    <input type="number" step="0.1" min="0" max="10" name="foodItems[${itemIndex}].rating" placeholder="Score" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                 </div>
-                
-                <input type="text" name="foodItems[${itemIndex}].description" placeholder="Brief thoughts..." 
-                       style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                <input type="text" name="foodItems[${itemIndex}].description" placeholder="Brief thoughts..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
             </div>
         `;
-
         container.insertAdjacentHTML('beforeend', rowHtml);
         itemIndex++;
+    }
+
+    // --- NEW IMAGE SELECTION LOGIC ---
+    
+    const coverInput = document.getElementById('coverImageIndex');
+    const skippedInput = document.getElementById('skippedImageIndices');
+    let skippedIndices = [];
+
+    function handleFileSelect(event) {
+        const files = event.target.files;
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        
+        // Reset Logic
+        previewContainer.innerHTML = '';
+        coverInput.value = 0;
+        skippedIndices = [];
+        skippedInput.value = "";
+
+        if (files.length === 0) return;
+
+        Array.from(files).forEach((file, index) => {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.dataset.index = index; // Store index for reference
+
+                // First image is default selected
+                if (index === 0) div.classList.add('selected'); 
+                
+                // CLICK TO SET COVER
+                div.onclick = function() {
+                    // Remove selected class from all
+                    document.querySelectorAll('.preview-item').forEach(el => el.classList.remove('selected'));
+                    // Add to clicked
+                    div.classList.add('selected');
+                    // Update hidden input
+                    coverInput.value = index;
+                };
+
+                div.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview">
+                    <div class="cover-badge">COVER</div>
+                    <div class="delete-badge" onclick="removeImage(event, this, ${index})">
+                        <i class="fas fa-times"></i>
+                    </div>
+                `;
+                
+                previewContainer.appendChild(div);
+            }
+            
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function removeImage(event, element, index) {
+        event.stopPropagation(); // Don't trigger cover selection
+        
+        // Add index to skipped list
+        skippedIndices.push(index);
+        skippedInput.value = skippedIndices.join(",");
+
+        // Visually remove
+        const item = element.closest('.preview-item');
+        item.style.display = 'none';
+        item.classList.remove('selected');
+
+        // If the user deleted the currently selected cover, reset cover to the first visible one
+        if (coverInput.value == index) {
+            // Find first visible item
+            const firstVisible = Array.from(document.querySelectorAll('.preview-item'))
+                .find(el => el.style.display !== 'none');
+            
+            if (firstVisible) {
+                firstVisible.classList.add('selected');
+                coverInput.value = firstVisible.dataset.index;
+            } else {
+                coverInput.value = -1; // No cover available
+            }
+        }
     }
 </script>
 
