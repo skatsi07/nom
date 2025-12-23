@@ -5,4 +5,6 @@ import java.io.IOException;
 
 public interface IFileUploader {
     String uploadFile(MultipartFile file) throws IOException;
+
+    void deleteFile(String url) throws IOException;
 }

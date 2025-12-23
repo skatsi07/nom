@@ -152,6 +152,12 @@ public class ProfileController {
         existingUser.setBio(user.getBio());
 
         if (!multipartFile.isEmpty()) {
+            // Delete old photo if it exists
+            String oldUrl = existingUser.getProfilePicUrl();
+            if (oldUrl != null && !oldUrl.isEmpty()) {
+                fileUploader.deleteFile(oldUrl);
+            }
+
             String photoUrl = fileUploader.uploadFile(multipartFile);
             existingUser.setProfilePicUrl(photoUrl);
         }
@@ -234,6 +240,20 @@ public class ProfileController {
                     .map(Long::parseLong)
                     .toList();
 
+            // Validate: Only delete if they belong to this review (security/sanity check)
+            for (Long idToRemove : idsToRemove) {
+                currentDbPhotos.stream()
+                        .filter(p -> p.getId().equals(idToRemove))
+                        .findFirst()
+                        .ifPresent(p -> {
+                            try {
+                                fileUploader.deleteFile(p.getPhotoUrl());
+                            } catch (IOException e) {
+                                System.err.println("Failed to delete photo: " + p.getPhotoUrl());
+                            }
+                        });
+            }
+
             currentDbPhotos.removeIf(p -> idsToRemove.contains(p.getId()));
         }
 
@@ -311,6 +331,14 @@ public class ProfileController {
 
         // 2. Security Check (Only allow skatsi07 to delete)
         if (review.getUser().getUsername().equals("skatsi07")) {
+            // Delete photos from Cloudinary
+            for (ReviewPhoto photo : review.getPhotos()) {
+                try {
+                    fileUploader.deleteFile(photo.getPhotoUrl());
+                } catch (IOException e) {
+                    System.err.println("Failed to delete photo: " + photo.getPhotoUrl());
+                }
+            }
             reviewRepository.delete(review);
         }
 
