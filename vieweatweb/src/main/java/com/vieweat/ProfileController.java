@@ -1,5 +1,6 @@
 package com.vieweat;
 
+import com.vieweat.service.IFileUploader;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,7 +9,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
@@ -22,6 +22,7 @@ public class ProfileController {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final IFileUploader fileUploader;
 
     // --- 1. HOME PAGE (Recent 5 Reviews) ---
     @GetMapping("/")
@@ -62,19 +63,20 @@ public class ProfileController {
             @RequestParam("reviewImages") MultipartFile[] filesArray,
             @RequestParam(value = "coverImageIndex", defaultValue = "0") int coverIndex,
             // NEW: Receive indices to skip
-            @RequestParam(value = "skippedImageIndices", required = false) String skippedIndicesStr) throws IOException {
+            @RequestParam(value = "skippedImageIndices", required = false) String skippedIndicesStr)
+            throws IOException {
 
         // --- A. FILTER & REORDER IMAGES ---
-        
+
         // 1. Create a "Working List" excluding skipped files
         List<MultipartFile> validFiles = new ArrayList<>();
         List<Integer> skippedIndices = new ArrayList<>();
 
         if (skippedIndicesStr != null && !skippedIndicesStr.isEmpty()) {
             skippedIndices = Arrays.stream(skippedIndicesStr.split(","))
-                                   .map(String::trim)
-                                   .map(Integer::parseInt)
-                                   .toList();
+                    .map(String::trim)
+                    .map(Integer::parseInt)
+                    .toList();
         }
 
         // Only add files that are NOT in the skipped list
@@ -88,9 +90,9 @@ public class ProfileController {
         // We need to map the "Original Index" (from HTML) to the "New List Index"
         if (!validFiles.isEmpty() && coverIndex >= 0 && !skippedIndices.contains(coverIndex)) {
             MultipartFile selectedCover = filesArray[coverIndex];
-            
+
             // Remove it from wherever it ended up in validFiles
-            validFiles.remove(selectedCover); 
+            validFiles.remove(selectedCover);
             // Add it to the front
             validFiles.add(0, selectedCover);
         }
@@ -113,19 +115,17 @@ public class ProfileController {
         if (!validFiles.isEmpty()) {
             for (MultipartFile file : validFiles) {
                 if (file != null && !file.isEmpty() && file.getOriginalFilename() != null) {
-                    String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+                    // Upload to Cloudinary
+                    String photoUrl = fileUploader.uploadFile(file);
 
                     ReviewPhoto photo = new ReviewPhoto();
-                    photo.setPhotoUrl("/review-photos/" + savedReview.getId() + "/" + fileName);
-                    photo.setReview(savedReview); 
+                    photo.setPhotoUrl(photoUrl);
+                    photo.setReview(savedReview);
 
                     if (savedReview.getPhotos() == null) {
                         savedReview.setPhotos(new ArrayList<>());
                     }
                     savedReview.getPhotos().add(photo);
-
-                    String uploadDir = "review-photos/" + savedReview.getId();
-                    FileUploadUtil.saveFile(uploadDir, fileName, file);
                 }
             }
             reviewRepository.save(savedReview);
@@ -152,10 +152,8 @@ public class ProfileController {
         existingUser.setBio(user.getBio());
 
         if (!multipartFile.isEmpty()) {
-            String fileName = StringUtils.cleanPath(multipartFile.getOriginalFilename());
-            existingUser.setProfilePicUrl("/user-photos/" + existingUser.getId() + "/" + fileName);
-            String uploadDir = "user-photos/" + existingUser.getId();
-            FileUploadUtil.saveFile(uploadDir, fileName, multipartFile);
+            String photoUrl = fileUploader.uploadFile(multipartFile);
+            existingUser.setProfilePicUrl(photoUrl);
         }
 
         userRepository.save(existingUser);
@@ -294,14 +292,11 @@ public class ProfileController {
 
     // Helper method to save file and create object
     private ReviewPhoto saveFileToReview(MultipartFile file, Review review) throws IOException {
-        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String photoUrl = fileUploader.uploadFile(file);
 
         ReviewPhoto photo = new ReviewPhoto();
-        photo.setPhotoUrl("/review-photos/" + review.getId() + "/" + fileName);
+        photo.setPhotoUrl(photoUrl);
         photo.setReview(review);
-
-        String uploadDir = "review-photos/" + review.getId();
-        FileUploadUtil.saveFile(uploadDir, fileName, file);
 
         return photo;
     }
