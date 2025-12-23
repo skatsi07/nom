@@ -1,6 +1,5 @@
 package com.vieweat;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -21,27 +20,17 @@ import java.util.Collections;
 @Component
 public class SupabaseJwtFilter extends OncePerRequestFilter {
 
-    private final String SUPABASE_JWT_SECRET;
+    @org.springframework.beans.factory.annotation.Value("${supabase.jwt-secret}")
+    private String supabaseJwtSecret;
+
+    @org.springframework.beans.factory.annotation.Value("${supabase.url}")
+    private String supabaseUrl;
+
+    @org.springframework.beans.factory.annotation.Value("${supabase.anon-key}")
+    private String supabaseAnonKey;
 
     public SupabaseJwtFilter() {
-        // Load JWT secret from .env or environment variables
-        // CRITICAL NOTE: For "anon" keys (HS256), the signature verification requires
-        // the PROJECT JWT SECRET.
-        // The "anon key" itself is a JWT signed by that secret.
-        // We temporarily use a placeholder or read from env if available.
-        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-        String secret = dotenv.get("SUPABASE_JWT_SECRET");
-
-        // Fallback for development if user provided anon key instead of secret
-        // In a real scenario, this MUST be the "JWT Secret" from API settings, not the
-        // anon key.
-        if (secret != null && !secret.isEmpty()) {
-            this.SUPABASE_JWT_SECRET = secret;
-            System.out.println("SupabaseJwtFilter: JWT Secret successfully loaded.");
-        } else {
-            this.SUPABASE_JWT_SECRET = "waiting_for_user_to_provide_actual_secret_verify_signature_will_fail";
-            System.err.println("SupabaseJwtFilter: WARNING - JWT Secret NOT found in .env!");
-        }
+        // Dependencies are injected by Spring after construction
     }
 
     @Override
@@ -61,9 +50,6 @@ public class SupabaseJwtFilter extends OncePerRequestFilter {
             // Validate Token by calling Supabase Auth API directly
             // This avoids algorithm mismatch issues (ES256 vs HS256) and key management
             // headaches.
-
-            String supabaseUrl = "https://voqprdlmfgdldefqvjzs.supabase.co"; // Ideally from properties
-            String supabaseAnonKey = "sb_publishable_9JBKTpT6CeJIoZXc9MUtGw_qSjIQvwB"; // Ideally from properties
 
             java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient();
             java.net.http.HttpRequest authRequest = java.net.http.HttpRequest.newBuilder()
