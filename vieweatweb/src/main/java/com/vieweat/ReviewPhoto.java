@@ -22,4 +22,6 @@ public class ReviewPhoto {
     @ManyToOne
     @JoinColumn(name = "review_id", nullable = false)
     private Review review;
+
+    private Integer photoOrder;
 }

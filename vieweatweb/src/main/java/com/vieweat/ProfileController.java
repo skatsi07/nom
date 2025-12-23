@@ -113,6 +113,7 @@ public class ProfileController {
 
         // Process final list
         if (!validFiles.isEmpty()) {
+            int order = 0;
             for (MultipartFile file : validFiles) {
                 if (file != null && !file.isEmpty() && file.getOriginalFilename() != null) {
                     // Upload to Cloudinary
@@ -121,6 +122,7 @@ public class ProfileController {
                     ReviewPhoto photo = new ReviewPhoto();
                     photo.setPhotoUrl(photoUrl);
                     photo.setReview(savedReview);
+                    photo.setPhotoOrder(order++);
 
                     if (savedReview.getPhotos() == null) {
                         savedReview.setPhotos(new ArrayList<>());
@@ -303,6 +305,12 @@ public class ProfileController {
 
         // E. Update DB (Clear and Refill to keep order)
         existingReview.getPhotos().clear();
+
+        // Update order indices
+        for (int i = 0; i < tempPhotoList.size(); i++) {
+            tempPhotoList.get(i).setPhotoOrder(i);
+        }
+
         existingReview.getPhotos().addAll(tempPhotoList);
 
         reviewRepository.save(existingReview);

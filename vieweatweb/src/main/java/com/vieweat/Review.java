@@ -15,10 +15,10 @@ public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; 
+    private Long id;
 
-    @ManyToOne 
-    @JoinColumn(name = "user_id", nullable = false) 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     // --- MANDATORY FIELDS ---
@@ -27,7 +27,7 @@ public class Review {
 
     @Column(unique = false, nullable = false)
     private String placeName;
-    
+
     @Column(unique = false, nullable = false)
     private String date;
 
@@ -36,7 +36,7 @@ public class Review {
     private String cuisine;
     private String instagramUrl;
     private String tiktokUrl;
-    
+
     @Column(columnDefinition = "TEXT")
     private String overallDesc;
 
@@ -44,13 +44,13 @@ public class Review {
     private Double serviceScore;
     private Double ambianceScore;
 
-    @Builder.Default 
+    @Builder.Default
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
     private List<FoodItem> foodItems = new ArrayList<>();
 
     // --- PHOTOS ---
     @Builder.Default
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderColumn(name = "photo_order") 
+    @OrderBy("photoOrder ASC")
     private List<ReviewPhoto> photos = new ArrayList<>();
 }
