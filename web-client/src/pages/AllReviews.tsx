@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import { optimizeCloudinaryUrl } from '../utils/imageUtils'
 
 // Interfaces (Shared)
 interface ReviewPhoto {
@@ -171,7 +172,12 @@ export default function AllReviews() {
                                 <div key={review.id} className="review-card-large" onClick={() => openModal(review)}>
                                     <div className="card-image-placeholder" style={{ overflow: 'hidden', position: 'relative' }}>
                                         {review.photos && review.photos.length > 0 ? (
-                                            <img src={review.photos[0].photoUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} alt="Review" />
+                                            <img
+                                                src={optimizeCloudinaryUrl(review.photos[0].photoUrl, 400, 300)}
+                                                loading="lazy"
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
+                                                alt="Review"
+                                            />
                                         ) : (
                                             <i className="fas fa-utensils"></i>
                                         )}
@@ -212,7 +218,7 @@ export default function AllReviews() {
                                 )}
                                 <div id="m-carousel-track" className="carousel-track">
                                     {selectedReview.photos.sort((a, b) => a.photoOrder - b.photoOrder).map(photo => (
-                                        <img key={photo.id} src={photo.photoUrl} alt="Review" />
+                                        <img key={photo.id} src={optimizeCloudinaryUrl(photo.photoUrl, 800)} alt="Review" />
                                     ))}
                                 </div>
                                 {selectedReview.photos && selectedReview.photos.length > 1 && (
