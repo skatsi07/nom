@@ -22,7 +22,7 @@ export default function EditProfile() {
                 const headers: HeadersInit = {}
                 if (token) headers['Authorization'] = `Bearer ${token}`
 
-                const res = await fetch(`http://localhost:8080/api/profile/${username}`, { headers });
+                const res = await fetch(`/api/profile/${username}`, { headers });
                 if (res.ok) {
                     const data = await res.json();
                     setBio(data.bio || '');
@@ -56,7 +56,7 @@ export default function EditProfile() {
                 formData.append('image', selectedFile);
             }
 
-            const res = await fetch("http://localhost:8080/api/profile", {
+            const res = await fetch("/api/profile", {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`

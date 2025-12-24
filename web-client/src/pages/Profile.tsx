@@ -52,39 +52,58 @@ export default function Profile() {
     const [selectedReview, setSelectedReview] = useState<Review | null>(null)
     // const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0); // Unused
 
-    const [loading, setLoading] = useState(true)
+    const [loadingProfile, setLoadingProfile] = useState(true)
+    const [loadingReviews, setLoadingReviews] = useState(true)
     const [error, setError] = useState('')
 
+    // 1. Fetch Profile
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchProfile = async () => {
+            if (!username) return
             try {
-                // 1. Get Token
                 const { data: session } = await supabase.auth.getSession()
                 const token = session.session?.access_token
                 const headers: HeadersInit = {}
                 if (token) headers['Authorization'] = `Bearer ${token}`
 
-                // 2. Fetch Profile
-                const profileRes = await fetch(`http://localhost:8080/api/profile/${username}`, { headers })
+                const profileRes = await fetch(`/api/profile/${username}`, { headers })
                 if (!profileRes.ok) throw new Error("Failed to fetch profile")
                 const profileData = await profileRes.json()
                 setProfile(profileData)
-
-                // 3. Fetch Reviews (filtered by username)
-                const reviewsRes = await fetch(`http://localhost:8080/api/reviews?username=${username}`, { headers })
-                if (reviewsRes.ok) {
-                    const reviewsData = await reviewsRes.json()
-                    setReviews(reviewsData)
-                }
-
             } catch (err: any) {
                 console.error("Error:", err);
                 setError(err.message)
             } finally {
-                setLoading(false)
+                setLoadingProfile(false)
             }
         }
-        if (username) fetchData()
+        fetchProfile()
+    }, [username])
+
+    // 2. Fetch Reviews
+    useEffect(() => {
+        const fetchReviews = async () => {
+            if (!username) return
+            setLoadingReviews(true)
+            try {
+                const { data: session } = await supabase.auth.getSession()
+                const token = session.session?.access_token
+                const headers: HeadersInit = {}
+                if (token) headers['Authorization'] = `Bearer ${token}`
+
+                // Fetch Reviews (Paginated endpoint, just get first page)
+                const reviewsRes = await fetch(`/api/reviews?username=${username}&page=0&size=9`, { headers })
+                if (reviewsRes.ok) {
+                    const pageData = await reviewsRes.json()
+                    setReviews(pageData.content)
+                }
+            } catch (err) {
+                console.error(err)
+            } finally {
+                setLoadingReviews(false)
+            }
+        }
+        fetchReviews()
     }, [username])
 
     // --- Helper for Stars ---
@@ -123,9 +142,8 @@ export default function Profile() {
     }
 
 
-    if (loading) return <div className="text-center mt-10">Loading...</div>
+    // Removed Blocking Loading Screen
     if (error) return <div className="text-center mt-10 text-red-500">Error: {error}</div>
-    if (!profile) return <div className="text-center mt-10">Profile not found</div>
 
     return (
         <div className="app-wrapper">
@@ -143,24 +161,33 @@ export default function Profile() {
                         <div className="cover-photo"></div>
                         <div className="profile-info">
                             <div className="profile-pic">
-                                {profile.profilePicUrl ? (
-                                    <img src={optimizeCloudinaryUrl(profile.profilePicUrl, 300)} alt="Profile" />
+                                {loadingProfile ? (
+                                    <div className="skeleton-circle" style={{ width: '100px', height: '100px', borderRadius: '50%', background: '#ddd' }}></div>
                                 ) : (
-                                    <span>Me</span>
+                                    profile?.profilePicUrl ? <img src={optimizeCloudinaryUrl(profile.profilePicUrl, 300)} alt="Profile" /> : <span>Me</span>
                                 )}
                             </div>
 
-                            <h2 style={{ marginBottom: '3px' }}>@{profile.username}</h2>
-                            <h1 style={{ marginTop: '0' }}>{profile.name}</h1>
-                            <h5>{profile.bio}</h5>
+                            {loadingProfile ? (
+                                <>
+                                    <div className="skeleton-text" style={{ width: '60%', height: '20px', background: '#ddd', margin: '10px auto' }}></div>
+                                    <div className="skeleton-text" style={{ width: '40%', height: '15px', background: '#eee', margin: '5px auto' }}></div>
+                                </>
+                            ) : (
+                                <>
+                                    <h2 style={{ marginBottom: '3px' }}>@{profile?.username}</h2>
+                                    <h1 style={{ marginTop: '0' }}>{profile?.name}</h1>
+                                    <h5>{profile?.bio}</h5>
+                                </>
+                            )}
 
                             <div className="social-buttons">
-                                {profile.instagramUrl && (
+                                {profile?.instagramUrl && (
                                     <a href={profile.instagramUrl} target="_blank" rel="noreferrer" className="btn-social">
                                         <i className="fab fa-instagram" style={{ marginRight: '5px' }}></i> Instagram
                                     </a>
                                 )}
-                                {profile.tiktokUrl && (
+                                {profile?.tiktokUrl && (
                                     <a href={profile.tiktokUrl} target="_blank" rel="noreferrer" className="btn-social">
                                         <i className="fab fa-tiktok" style={{ marginRight: '5px' }}></i> TikTok
                                     </a>
@@ -175,7 +202,11 @@ export default function Profile() {
                     <section className="container">
                         <h2>Recent Eats</h2>
 
-                        {reviews.length === 0 ? (
+                        {loadingReviews ? (
+                            <div style={{ textAlign: 'center', padding: '40px', color: '#888' }}>
+                                <i className="fas fa-spinner fa-spin fa-2x"></i>
+                            </div>
+                        ) : reviews.length === 0 ? (
                             <p className="text-gray-500 text-center py-4">No reviews yet.</p>
                         ) : (
                             reviews.slice(0, 5).map(review => (

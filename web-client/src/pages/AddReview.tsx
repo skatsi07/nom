@@ -128,7 +128,7 @@ export default function AddReview() {
                 body.append("images", file);
             });
 
-            const res = await fetch("http://localhost:8080/api/reviews", {
+            const res = await fetch("/api/reviews", {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`

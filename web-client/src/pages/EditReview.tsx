@@ -70,7 +70,7 @@ export default function EditReview() {
                 const headers: HeadersInit = {}
                 if (token) headers['Authorization'] = `Bearer ${token}`
 
-                const res = await fetch(`http://localhost:8080/api/reviews/${id}`, { headers });
+                const res = await fetch(`/api/reviews/${id}`, { headers });
                 if (res.ok) {
                     const data = await res.json();
                     setFormData({
@@ -203,7 +203,7 @@ export default function EditReview() {
             // Append New Files
             newFiles.forEach(file => body.append("newImages", file));
 
-            const res = await fetch(`http://localhost:8080/api/reviews/${id}`, {
+            const res = await fetch(`/api/reviews/${id}`, {
                 method: "PUT",
                 headers: { "Authorization": `Bearer ${token}` },
                 body: body
