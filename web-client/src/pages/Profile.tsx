@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import { optimizeCloudinaryUrl } from '../utils/imageUtils'
 
 // --- Interfaces for API Data ---
 interface ReviewPhoto {
@@ -143,7 +144,7 @@ export default function Profile() {
                         <div className="profile-info">
                             <div className="profile-pic">
                                 {profile.profilePicUrl ? (
-                                    <img src={profile.profilePicUrl} alt="Profile" />
+                                    <img src={optimizeCloudinaryUrl(profile.profilePicUrl, 300)} alt="Profile" />
                                 ) : (
                                     <span>Me</span>
                                 )}
@@ -246,7 +247,7 @@ export default function Profile() {
 
                                         <div id="m-carousel-track" className="carousel-track">
                                             {selectedReview.photos.sort((a, b) => a.photoOrder - b.photoOrder).map(photo => (
-                                                <img key={photo.id} src={photo.photoUrl} alt="Review" />
+                                                <img key={photo.id} src={optimizeCloudinaryUrl(photo.photoUrl, 800)} alt="Review" />
                                             ))}
                                         </div>
 
