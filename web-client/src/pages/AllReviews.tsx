@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { optimizeCloudinaryUrl } from '../utils/imageUtils'
@@ -43,40 +43,91 @@ interface UserProfile {
 export default function AllReviews() {
     const { username } = useParams<{ username: string }>();
 
-    // If no username (shouldn't happen due to route), default or error state
-    // For now, if undefined, we can render nothing or error. Route guarantees it though.
-
     const [user, setUser] = useState<UserProfile | null>(null)
     const [reviews, setReviews] = useState<Review[]>([])
-    const [loading, setLoading] = useState(true)
+
+    // Pagination State
+    const [page, setPage] = useState(0)
+    const [hasMore, setHasMore] = useState(true)
+    const [loadingReviews, setLoadingReviews] = useState(false)
+    const [loadingProfile, setLoadingProfile] = useState(true)
 
     // Modal State
     const [selectedReview, setSelectedReview] = useState<Review | null>(null)
 
+    // Infinite Scroll Observer
+    const observer = useRef<IntersectionObserver | null>(null)
+    const lastReviewElementRef = useCallback((node: HTMLDivElement) => {
+        if (loadingReviews) return
+        if (observer.current) observer.current.disconnect()
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage(prev => prev + 1)
+            }
+        })
+        if (node) observer.current.observe(node)
+    }, [loadingReviews, hasMore])
+
+    // 1. Fetch Profile (Once)
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchProfile = async () => {
+            if (!username) return
             try {
                 const { data: session } = await supabase.auth.getSession()
                 const token = session.session?.access_token
                 const headers: HeadersInit = {}
                 if (token) headers['Authorization'] = `Bearer ${token}`
 
-                // Fetch Profile
-                const profileRes = await fetch(`http://localhost:8080/api/profile/${username}`, { headers })
+                const profileRes = await fetch(`/api/profile/${username}`, { headers })
                 if (profileRes.ok) setUser(await profileRes.json())
-
-                // Fetch Reviews
-                const reviewsRes = await fetch(`http://localhost:8080/api/reviews?username=${username}`, { headers })
-                if (reviewsRes.ok) setReviews(await reviewsRes.json())
-
             } catch (err) {
                 console.error(err)
             } finally {
-                setLoading(false)
+                setLoadingProfile(false)
             }
         }
-        fetchData()
+        fetchProfile()
     }, [username])
+
+    // 2. Fetch Reviews (Paginated)
+    useEffect(() => {
+        const fetchReviews = async () => {
+            if (!username) return
+            setLoadingReviews(true)
+            try {
+                const { data: session } = await supabase.auth.getSession()
+                const token = session.session?.access_token
+                const headers: HeadersInit = {}
+                if (token) headers['Authorization'] = `Bearer ${token}`
+
+                const size = 9
+                const reviewsRes = await fetch(`/api/reviews?username=${username}&page=${page}&size=${size}`, { headers })
+
+                if (reviewsRes.ok) {
+                    const pageData = await reviewsRes.json()
+                    const newReviews: Review[] = pageData.content
+
+
+                    setReviews(prev => {
+                        // Deduplication: Filter out any reviews that already exist in state
+                        const existingIds = new Set(prev.map(r => r.id))
+                        const uniqueNewReviews = newReviews.filter(r => !existingIds.has(r.id))
+                        return [...prev, ...uniqueNewReviews]
+                    })
+
+                    // Stop Condition
+                    if (pageData.last) {
+                        setHasMore(false)
+                    }
+                }
+            } catch (err) {
+                console.error(err)
+            } finally {
+                setLoadingReviews(false)
+            }
+        }
+        fetchReviews()
+    }, [username, page])
 
     // --- Stars Helper ---
     const renderStars = (score: number) => {
@@ -110,7 +161,7 @@ export default function AllReviews() {
         }
     }
 
-    if (loading) return <div className="text-center mt-10">Loading...</div>
+    // Removed Blocking Loading Screen
 
     return (
         <div className="app-wrapper">
@@ -122,11 +173,25 @@ export default function AllReviews() {
                         <div className="cover-photo"></div>
                         <div className="profile-info">
                             <div className="profile-pic">
-                                {user?.profilePicUrl ? <img src={user.profilePicUrl} alt="Me" /> : <span>Me</span>}
+                                {loadingProfile ? (
+                                    <div className="skeleton-circle" style={{ width: '100px', height: '100px', borderRadius: '50%', background: '#ddd' }}></div>
+                                ) : (
+                                    user?.profilePicUrl ? <img src={user.profilePicUrl} alt="Me" /> : <span>Me</span>
+                                )}
                             </div>
-                            <h2 style={{ marginBottom: '3px' }}>@{user?.username || 'user'}</h2>
-                            <h1 style={{ marginTop: '0' }}>{user?.name || 'Name'}</h1>
-                            <h5>{user?.bio || 'Bio'}</h5>
+
+                            {loadingProfile ? (
+                                <>
+                                    <div className="skeleton-text" style={{ width: '60%', height: '20px', background: '#ddd', margin: '10px auto' }}></div>
+                                    <div className="skeleton-text" style={{ width: '40%', height: '15px', background: '#eee', margin: '5px auto' }}></div>
+                                </>
+                            ) : (
+                                <>
+                                    <h2 style={{ marginBottom: '3px' }}>@{user?.username || 'user'}</h2>
+                                    <h1 style={{ marginTop: '0' }}>{user?.name || 'Name'}</h1>
+                                    <h5>{user?.bio || 'Bio'}</h5>
+                                </>
+                            )}
 
                             <div className="social-buttons" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '15px' }}>
                                 <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', width: '100%', marginBottom: '10px' }}>
@@ -168,29 +233,61 @@ export default function AllReviews() {
                         </div>
 
                         <div className="review-grid-cards">
-                            {reviews.map(review => (
-                                <div key={review.id} className="review-card-large" onClick={() => openModal(review)}>
-                                    <div className="card-image-placeholder" style={{ overflow: 'hidden', position: 'relative' }}>
-                                        {review.photos && review.photos.length > 0 ? (
-                                            <img
-                                                src={optimizeCloudinaryUrl(review.photos[0].photoUrl, 400, 300)}
-                                                loading="lazy"
-                                                style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
-                                                alt="Review"
-                                            />
-                                        ) : (
-                                            <i className="fas fa-utensils"></i>
-                                        )}
-                                    </div>
-                                    <div className="card-info">
-                                        <h3>{review.placeName}</h3>
-                                        <div className="star-group">
-                                            {renderStars(review.overallRating)}
+                            {reviews.map((review, index) => {
+                                if (reviews.length === index + 1) {
+                                    return (
+                                        <div ref={lastReviewElementRef} key={review.id} className="review-card-large" onClick={() => openModal(review)}>
+                                            <div className="card-image-placeholder" style={{ overflow: 'hidden', position: 'relative' }}>
+                                                {review.photos && review.photos.length > 0 ? (
+                                                    <img
+                                                        src={optimizeCloudinaryUrl(review.photos[0].photoUrl, 400, 300)}
+                                                        loading="lazy"
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
+                                                        alt="Review"
+                                                    />
+                                                ) : (
+                                                    <i className="fas fa-utensils"></i>
+                                                )}
+                                            </div>
+                                            <div className="card-info">
+                                                <h3>{review.placeName}</h3>
+                                                <div className="star-group">
+                                                    {renderStars(review.overallRating)}
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-                            ))}
+                                    )
+                                } else {
+                                    return (
+                                        <div key={review.id} className="review-card-large" onClick={() => openModal(review)}>
+                                            <div className="card-image-placeholder" style={{ overflow: 'hidden', position: 'relative' }}>
+                                                {review.photos && review.photos.length > 0 ? (
+                                                    <img
+                                                        src={optimizeCloudinaryUrl(review.photos[0].photoUrl, 400, 300)}
+                                                        loading="lazy"
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
+                                                        alt="Review"
+                                                    />
+                                                ) : (
+                                                    <i className="fas fa-utensils"></i>
+                                                )}
+                                            </div>
+                                            <div className="card-info">
+                                                <h3>{review.placeName}</h3>
+                                                <div className="star-group">
+                                                    {renderStars(review.overallRating)}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                }
+                            })}
                         </div>
+                        {loadingReviews && (
+                            <div style={{ textAlign: 'center', padding: '20px', color: '#888', width: '100%' }}>
+                                <i className="fas fa-spinner fa-spin fa-lg"></i>
+                            </div>
+                        )}
                     </section>
                 </main>
             </div>

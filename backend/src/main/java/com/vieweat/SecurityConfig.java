@@ -8,6 +8,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import org.springframework.security.config.Customizer;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -22,7 +24,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for API
-                .cors(cors -> cors.configure(http)) // Enable CORS
+                .cors(Customizer.withDefaults()) // Enable CORS using @CrossOrigin annotations
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
                         // Public endpoints (New API + Swagger)

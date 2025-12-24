@@ -27,14 +27,15 @@ export default function ManageReviews() {
             const headers: HeadersInit = { 'Authorization': `Bearer ${token}` };
 
             // 1. Get My Profile to know my username
-            const meRes = await fetch(`http://localhost:8080/api/me`, { headers });
+            const meRes = await fetch(`/api/me`, { headers });
             if (!meRes.ok) throw new Error("Failed to fetch profile");
             const me = await meRes.json();
 
             // 2. Fetch My Reviews
-            const res = await fetch(`http://localhost:8080/api/reviews?username=${me.username}`, { headers });
+            const res = await fetch(`/api/reviews?username=${me.username}&size=100`, { headers }); // Fetch large batch for management
             if (res.ok) {
-                setReviews(await res.json());
+                const pageData = await res.json();
+                setReviews(pageData.content);
             }
         } catch (err) {
             console.error(err);
@@ -58,7 +59,7 @@ export default function ManageReviews() {
                 return;
             }
 
-            const res = await fetch(`http://localhost:8080/api/reviews/${id}`, {
+            const res = await fetch(`/api/reviews/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

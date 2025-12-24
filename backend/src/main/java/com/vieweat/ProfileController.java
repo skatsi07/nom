@@ -6,6 +6,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
@@ -71,21 +75,12 @@ public class ProfileController {
 
     // --- 2. GET REVIEWS ---
     @GetMapping("/reviews")
-    public ResponseEntity<List<ReviewDTO>> getReviews(
-            @RequestParam(name = "username", required = false) String username) {
-        // Default to a specific user if needed, or error.
-        // For public viewing, 'username' param is required.
-        // If not provided, we could optionally check Principal if we wanted "my
-        // reviews",
-        // but for this specific endpoint design (public browse), let's enforce or
-        // default.
-        // User requested: "AllReviews page to only show the reviews of the user that a
-        // person is viewing"
+    public ResponseEntity<Page<ReviewDTO>> getReviews(
+            @RequestParam(name = "username", required = false) String username,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "9") int size) {
 
         if (username == null || username.isEmpty()) {
-            // Fallback or error. Let's return 400 or empty.
-            // Or defaults to skatsi07 for legacy compatibility if strictly needed?
-            // Plan says: "Main public access... Maintain @RequestParam"
             return ResponseEntity.badRequest().build();
         }
 
@@ -93,10 +88,13 @@ public class ProfileController {
         if (user == null)
             return ResponseEntity.notFound().build();
 
-        List<Review> reviews = reviewRepository.findAllByUserOrderByDateDesc(user);
-        List<ReviewDTO> dtos = reviews.stream().map(this::convertToDTO).collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Review> reviewsPage = reviewRepository.findAllByUserOrderByDateDesc(user, pageable);
 
-        return ResponseEntity.ok(dtos);
+        // Convert Page<Review> to Page<ReviewDTO>
+        Page<ReviewDTO> dtoPage = reviewsPage.map(this::convertToDTO);
+
+        return ResponseEntity.ok(dtoPage);
     }
 
     @GetMapping("/reviews/{id}")
