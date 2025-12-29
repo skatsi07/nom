@@ -45,7 +45,7 @@ public class Review {
     private Double ambianceScore;
 
     @Builder.Default
-    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
     @org.hibernate.annotations.BatchSize(size = 20)
     private List<FoodItem> foodItems = new ArrayList<>();
 
