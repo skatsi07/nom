@@ -206,7 +206,7 @@ export default function AllReviews() {
                                         </a>
                                     )}
                                 </div>
-                                <Link to="/" className="btn-dark" style={{ width: '100%', display: 'block', textAlign: 'center', textDecoration: 'none', padding: '10px 0' }}>
+                                <Link to={`/profile/${username}`} className="btn-dark" style={{ width: '100%', display: 'block', textAlign: 'center', textDecoration: 'none', padding: '10px 0' }}>
                                     <i className="fas fa-arrow-left"></i> Back to Profile
                                 </Link>
                             </div>

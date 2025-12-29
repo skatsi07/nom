@@ -148,10 +148,7 @@ export default function Profile() {
     return (
         <div className="app-wrapper">
 
-            {/* Mobile Header (Hidden on Laptop via CSS) */}
-            <header>
-                <div className="logo">Let's Eat</div>
-            </header>
+
 
             <div className="layout-grid">
 
@@ -198,7 +195,7 @@ export default function Profile() {
                 </aside>
 
                 {/* --- MAIN CONTENT --- */}
-                <main className="main-content">
+                <main className="main-content" style={{ boxShadow: 'none', border: 'none' }}>
                     <section className="container">
                         <h2>Recent Eats</h2>
 

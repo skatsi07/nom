@@ -21,6 +21,8 @@ body {
   justify-content: center;
   min-height: 100vh;
   margin: 0;
+  overflow-x: hidden;
+  /* Prevent horizontal scroll */
   /* React default often has margin */
 }
 
@@ -33,6 +35,8 @@ body {
   box-shadow: none;
   min-height: 100vh;
   padding-bottom: 40px;
+  overflow-x: hidden;
+  /* Prevent horizontal scroll */
 }
 
 /* HEADER */
@@ -233,6 +237,8 @@ h2 {
   cursor: pointer;
   flex-shrink: 0;
   transition: transform 0.2s;
+  scroll-snap-align: center;
+  /* Snap when scrolling */
 }
 
 .cat-box:hover {
@@ -639,6 +645,124 @@ h2 {
   .carousel-btn {
     display: none;
   }
+}
+
+/* --- MOBILE OPTIMIZATIONS (iPhone/Small Screens) --- */
+@media (max-width: 600px) {
+
+  .app-wrapper,
+  .layout-grid,
+  .main-content {
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  .layout-grid {
+    padding: 10px;
+    /* Reduce outer padding */
+    gap: 15px;
+    display: flex;
+    /* Ensure it's a flex container */
+    flex-direction: column;
+    /* Stack items vertically */
+  }
+
+  .main-content {
+    padding: 15px 15px;
+    /* Restoring 15px side padding to fix left clip */
+  }
+
+  .profile-info {
+    padding: 0 15px 15px;
+  }
+
+  /* Compact Review Row for Profile Page */
+  .review-row {
+    padding: 12px 10px;
+    /* Safer horizontal padding */
+    gap: 8px;
+  }
+
+  /* Flex adjustments to prevent cutoff */
+  .place-name {
+    font-size: 0.9rem;
+    flex: 1 1 auto;
+    /* Allow shrinking/growing */
+    white-space: normal;
+    /* Allow wrapping */
+    overflow: visible;
+    text-overflow: clip;
+    min-width: 0;
+    /* Flexbox ellipsis trick */
+  }
+
+  /* Wrap categories on mobile */
+  /* Scrollable categories on mobile (Carousel) */
+  .category-grid {
+    display: flex;
+    /* Ensure row */
+    flex-wrap: nowrap;
+    /* Don't wrap */
+    overflow-x: auto;
+    /* Enable scroll */
+    justify-content: flex-start;
+    /* Start from left */
+    gap: 15px;
+    padding-bottom: 10px;
+    /* Space for scrollbar if any */
+    scroll-snap-type: x mandatory;
+    /* Snap effect */
+    -webkit-overflow-scrolling: touch;
+    /* Smooth scroll iOS */
+  }
+
+  .star-group {
+    flex: 0 0 auto;
+    /* Don't grow, take only needed space */
+    padding-left: 5px;
+    /* Reduce padding */
+  }
+
+  .date {
+    flex: 0 0 auto;
+    /* Don't grow */
+    font-size: 0.8rem;
+  }
+
+  /* Compact header for Modal */
+  .m-area-header {
+    padding: 20px 15px 10px;
+  }
+
+  .m-area-content {
+    padding: 10px 15px 20px;
+  }
+
+  /* wrap filters on mobile so they don't scroll off screen */
+  .filter-buttons {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    /* Disable scroll, we want full view */
+    justify-content: center;
+    /* Center them looks nice */
+  }
+}
+
+/* --- GLOBAL SIZING FIXES --- */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Ensure flex items can shrink below content size if needed (text truncation) */
+.place-name,
+.modal-header-row h2 {
+  min-width: 0;
 }
 
 
