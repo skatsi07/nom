@@ -462,188 +462,342 @@ h2 {
   color: #333;
 }
 
-/* --- MODAL LAYOUT (MOBILE/TABLET DEFAULT) --- */
-.modal-body {
-  display: grid;
-  grid-template-areas:
-    "header"
-    "images"
-    "content";
-  grid-template-columns: 1fr;
-  gap: 20px;
-  padding: 30px 20px 20px 20px;
-}
+/* =========================================
+   REVIEW MODAL (NEW 2-COLUMN LAYOUT)
+   ========================================= */
 
-.m-area-header {
-  grid-area: header;
-}
-
-.m-area-images {
-  grid-area: images;
-}
-
-.m-area-content {
-  grid-area: content;
-}
-
-.modal-header-row {
+.modal-content-new-layout {
+  background: white;
+  width: 95%;
+  max-width: 1000px;
+  max-height: 90vh;
+  /* Viewport height limit */
+  border-radius: 20px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
   display: flex;
-  justify-content: space-between;
-  align-items: start;
+  /* 2 Column Flex Layout */
+  flex-direction: row;
+  overflow: hidden;
+  /* Important for full-bleed rounded corners */
 }
 
-.modal-header-row h2 {
+/* --- CLOSE BUTTON --- */
+/* Floating on top right */
+.modal-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
   font-size: 1.8rem;
-  margin: 0;
-}
-
-.modal-stars-large {
-  font-size: 1.5rem;
-}
-
-.modal-subtitle {
-  color: #888;
-  margin-top: 5px;
-  font-size: 0.9rem;
-}
-
-.modal-divider {
-  border: 0;
-  border-top: 1px solid #eee;
-  margin: 20px 0;
-}
-
-.modal-meta-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.meta-row {
-  font-size: 0.95rem;
-}
-
-.description-box {
-  margin-top: 10px;
-  line-height: 1.5;
-  color: #555;
-}
-
-.rating-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-
-.quick-links-row {
-  display: flex;
-  gap: 15px;
-  margin-top: 5px;
-}
-
-.video-link-card {
-  border: 1px solid #eee;
-  border-radius: 12px;
-  padding: 10px 15px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  cursor: pointer;
-  transition: background 0.2s;
-  text-decoration: none;
-  color: inherit;
-}
-
-.video-link-card:hover {
-  background: #f9f9f9;
-}
-
-.video-icon {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  z-index: 100;
+  color: #333;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 1.2rem;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.video-icon.instagram {
-  background: linear-gradient(45deg, #f09433, #bc1888);
+.modal-close-btn:hover {
+  background: white;
+  transform: scale(1.1);
 }
 
-.video-icon.tiktok {
+/* --- LEFT COLUMN: PHOTOS --- */
+.modal-left-col {
+  flex: 1.1;
+  /* Slightly larger image area */
   background: #000;
-}
-
-.carousel-container {
   position: relative;
-  width: 100%;
-  display: none;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.carousel-track {
+.modal-carousel-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.modal-carousel-track {
   display: flex;
-  gap: 10px;
+  width: 100%;
+  height: 100%;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  -ms-overflow-style: none;
+  /* Hide scrollbar */
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.carousel-track::-webkit-scrollbar {
+.modal-carousel-track::-webkit-scrollbar {
   display: none;
 }
 
-.carousel-track img {
-  aspect-ratio: 3 / 4;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  background: #000;
-  border-radius: 12px;
+.modal-carousel-img {
   flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* FULL BLEED */
   scroll-snap-align: center;
 }
 
+/* Carousel Buttons inside the image area */
 .carousel-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.8);
-  color: #333;
-  border: none;
-  width: 35px;
-  height: 35px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(4px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   cursor: pointer;
   z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-  transition: background 0.2s;
+  transition: all 0.2s;
 }
 
 .carousel-btn:hover {
-  background: white;
+  background: rgba(255, 255, 255, 0.9);
+  color: black;
 }
 
 .carousel-btn.prev {
-  left: 15px;
+  left: 20px;
 }
 
 .carousel-btn.next {
-  right: 15px;
+  right: 20px;
 }
 
-@media (max-width: 960px) {
-  .carousel-btn {
-    display: none;
+
+.no-photos-placeholder {
+  color: white;
+  text-align: center;
+  opacity: 0.6;
+}
+
+.no-photos-placeholder i {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+/* --- RIGHT COLUMN: CONTENT --- */
+.modal-right-col {
+  flex: 0.9;
+  overflow-y: auto;
+  /* Scrollable content independent of image */
+  padding: 35px 30px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+/* SEPARATOR LINE */
+.modal-separator {
+  border: 0;
+  border-top: 1px solid #EAEAEA;
+  margin: 20px 0;
+}
+
+/* 1. Header */
+.modal-header-section h2 {
+  font-size: 1.8rem;
+  margin: 0 0 8px 0;
+  color: #111;
+}
+
+.modal-stars-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating-num {
+  color: #888;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* 2. Basics */
+.basics-line {
+  font-size: 0.95rem;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+.modal-description {
+  margin-top: 15px;
+  font-style: italic;
+  color: #555;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* 3. Food Items (NEW) */
+.modal-food-section h3 {
+  font-size: 1rem;
+  margin-bottom: 15px;
+}
+
+.food-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.food-item-row-display {
+  padding-bottom: 0;
+}
+
+.food-name-score {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.food-score-badge {
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 700;
+  min-width: 32px;
+  text-align: right;
+}
+
+.food-desc {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 3px;
+  font-weight: 400;
+}
+
+.empty-section-text {
+  font-size: 0.9rem;
+  color: #999;
+  font-style: italic;
+}
+
+/* 4. Footer & Bars */
+.rating-bars-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.rating-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.rating-bar-row .label {
+  width: 70px;
+  font-weight: 500;
+}
+
+.rating-bar-row .bar-bg {
+  flex: 1;
+  height: 6px;
+  background: #eee;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.rating-bar-row .bar-fill {
+  height: 100%;
+  background: #333;
+  /* Dark fill for premium look */
+  border-radius: 3px;
+}
+
+.rating-bar-row .score {
+  width: 25px;
+  text-align: right;
+  font-weight: 600;
+}
+
+.modal-socials-row {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.social-icon {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.social-icon:hover {
+  background: #f5f5f5;
+  transform: translateY(-2px);
+}
+
+
+/* --- RESPONSIVE MOBILE (< 800px) --- */
+@media (max-width: 800px) {
+  .modal-content-new-layout {
+    flex-direction: column;
+    /* Stack Vertically */
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    /* Full screen feel */
+  }
+
+  .modal-left-col {
+    flex: none;
+    height: 40vh;
+    /* Image takes top 40% */
+    width: 100%;
+  }
+
+  .modal-right-col {
+    flex: 1;
+    padding: 25px 20px;
+    overflow-y: auto;
+  }
+
+  .modal-close-btn {
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+  }
+
+  .modal-header-section h2 {
+    font-size: 1.5rem;
   }
 }
 
