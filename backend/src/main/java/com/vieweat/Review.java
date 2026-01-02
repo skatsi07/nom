@@ -28,6 +28,11 @@ public class Review {
     @Column(unique = false, nullable = false)
     private String placeName;
 
+    private String address;
+    private Double latitude;
+    private Double longitude;
+    private String externalId; // OSM ID
+
     @Column(unique = false, nullable = false)
     private String date;
 

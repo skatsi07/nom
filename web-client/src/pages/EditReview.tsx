@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import LocationSearch from '../components/LocationSearch';
+import { Map, MapMarker } from '@/components/ui/map';
+import type { UnifiedLocation } from '../services/locationService';
 
 interface FoodItem {
     id?: number;
@@ -18,6 +21,10 @@ interface ExistingPhoto {
 
 interface ReviewForm {
     placeName: string;
+    address: string;
+    latitude: number | null;
+    longitude: number | null;
+    externalId: string;
     date: string;
     overallRating: number | '';
     cuisine: string;
@@ -37,6 +44,10 @@ export default function EditReview() {
 
     const [formData, setFormData] = useState<ReviewForm>({
         placeName: '',
+        address: '',
+        latitude: null,
+        longitude: null,
+        externalId: '',
         date: '',
         overallRating: '',
         cuisine: '',
@@ -75,6 +86,10 @@ export default function EditReview() {
                     const data = await res.json();
                     setFormData({
                         placeName: data.placeName,
+                        address: data.address || '',
+                        latitude: data.latitude || null,
+                        longitude: data.longitude || null,
+                        externalId: data.externalId || '',
                         date: data.date,
                         overallRating: data.overallRating,
                         cuisine: data.cuisine,
@@ -107,6 +122,17 @@ export default function EditReview() {
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleLocationSelect = (loc: UnifiedLocation) => {
+        setFormData(prev => ({
+            ...prev,
+            // placeName: loc.name, // Don't overwrite name
+            address: loc.address,
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+            externalId: loc.externalId
+        }));
     };
 
     const handleFoodChange = (index: number, field: keyof FoodItem, value: string | number) => {
@@ -241,6 +267,34 @@ export default function EditReview() {
                             <label>Place Name *</label>
                             <input name="placeName" type="text" required value={formData.placeName} onChange={handleChange}
                                 style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
+                        </div>
+
+                        <div className="form-group" style={{ marginTop: '15px' }}>
+                            <label>Location</label>
+                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}>
+                                Update the location of the visit.
+                            </p>
+                            <LocationSearch
+                                onLocationSelect={handleLocationSelect}
+                                placeholder="Search for address..."
+                                initialValue="" // Don't pre-fill with place name to avoid confusion
+                            />
+                            {formData.latitude && formData.longitude && (
+                                <div style={{ marginTop: '10px', height: '200px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #ddd' }}>
+                                    <Map
+                                        center={[formData.longitude, formData.latitude]}
+                                        zoom={15}
+                                    >
+                                        <MapMarker
+                                            longitude={formData.longitude}
+                                            latitude={formData.latitude}
+                                        >
+                                            <div className="h-4 w-4 rounded-full border-2 border-white bg-red-500 shadow-lg" />
+                                        </MapMarker>
+                                    </Map>
+                                </div>
+                            )}
+                            {formData.address && <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>Selected: {formData.address}</p>}
                         </div>
                         <div className="form-group" style={{ marginTop: '15px' }}>
                             <label>Date Visited *</label>

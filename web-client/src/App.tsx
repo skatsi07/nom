@@ -9,6 +9,8 @@ import EditReview from './pages/EditReview';
 
 import ProtectedRoute from './components/ProtectedRoute';
 
+;
+
 function App() {
   return (
     <Router>
@@ -17,6 +19,7 @@ function App() {
         <Route path="/" element={<Navigate to="/profile/skatsi07" replace />} />
         <Route path="/profile/:username" element={<Profile />} />
         <Route path="/profile/:username/reviews" element={<AllReviews />} />
+
 
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>

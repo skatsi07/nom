@@ -9,6 +9,10 @@ import java.util.List;
 public class ReviewDTO {
     private Long id;
     private String placeName;
+    private String address;
+    private Double latitude;
+    private Double longitude;
+    private String externalId;
     private String date;
     private Double overallRating;
 

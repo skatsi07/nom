@@ -176,6 +176,9 @@ public class ProfileController {
             return ResponseEntity.status(403).build();
         }
 
+        System.out.println("Received Update Request: " + request);
+        System.out.println("Lat: " + request.getLatitude() + ", Lng: " + request.getLongitude());
+
         updateReviewFromRequest(review, request);
 
         // Update Food Items (Simple Replace)
@@ -318,6 +321,16 @@ public class ProfileController {
         review.setFoodScore(request.getFoodScore());
         review.setServiceScore(request.getServiceScore());
         review.setAmbianceScore(request.getAmbianceScore());
+
+        // Location fields
+        if (request.getLatitude() != null)
+            review.setLatitude(request.getLatitude());
+        if (request.getLongitude() != null)
+            review.setLongitude(request.getLongitude());
+        if (request.getAddress() != null)
+            review.setAddress(request.getAddress());
+        if (request.getExternalId() != null)
+            review.setExternalId(request.getExternalId());
     }
 
     private ReviewDTO convertToDTO(Review r) {
@@ -334,6 +347,10 @@ public class ProfileController {
                 .foodScore(r.getFoodScore())
                 .serviceScore(r.getServiceScore())
                 .ambianceScore(r.getAmbianceScore())
+                .latitude(r.getLatitude())
+                .longitude(r.getLongitude())
+                .address(r.getAddress())
+                .externalId(r.getExternalId())
                 .photos(r.getPhotos().stream().map(p -> ReviewPhotoDTO.builder()
                         .id(p.getId())
                         .photoUrl(p.getPhotoUrl())

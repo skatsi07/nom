@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { optimizeCloudinaryUrl } from '../utils/imageUtils'
+import { formatDate } from '../utils/dateUtils'
 import ReviewModal from '../components/ReviewModal';
+import UserReviewsMap from '../components/UserReviewsMap';
 
 // --- Interfaces for API Data ---
 interface ReviewPhoto {
@@ -56,6 +58,7 @@ export default function Profile() {
     const [loadingProfile, setLoadingProfile] = useState(true)
     const [loadingReviews, setLoadingReviews] = useState(true)
     const [error, setError] = useState('')
+    const [showMapModal, setShowMapModal] = useState(false)
 
     // 1. Fetch Profile
     useEffect(() => {
@@ -205,7 +208,7 @@ export default function Profile() {
                                     <div className="star-group">
                                         {renderStars(review.overallRating)}
                                     </div>
-                                    <span className="date">{review.date}</span>
+                                    <span className="date">{formatDate(review.date)}</span>
                                 </div>
                             ))
                         )}
@@ -228,17 +231,64 @@ export default function Profile() {
                     {/* Placeholder Map */}
                     <section className="container">
                         <h2>Food Map</h2>
-                        <div className="map-placeholder">
-                            <p>Interactive Map</p>
+                        <div style={{ position: 'relative', height: '300px', borderRadius: '12px', overflow: 'hidden' }}>
+                            {username && (
+                                <UserReviewsMap
+                                    username={username}
+                                    onReviewSelect={openModal}
+                                    style={{ width: '100%', height: '100%' }}
+                                />
+                            )}
+                            <button
+                                onClick={() => setShowMapModal(true)}
+                                className="btn-dark"
+                                style={{
+                                    position: 'absolute',
+                                    bottom: '15px',
+                                    right: '15px',
+                                    zIndex: 10,
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                                }}
+                            >
+                                <i className="fas fa-expand-arrows-alt" style={{ marginRight: '8px' }}></i>
+                                Enlarge Map
+                            </button>
                         </div>
                     </section>
                 </main>
             </div>
 
-            {/* --- MODAL --- */}
-            {selectedReview && (
-                <ReviewModal review={selectedReview} onClose={closeModal} />
-            )}
-        </div>
+            {/* --- REVIEW MODAL --- */}
+            {
+                selectedReview && (
+                    <ReviewModal review={selectedReview} onClose={closeModal} />
+                )
+            }
+
+            {/* --- MAP MODAL --- */}
+            <div className={`modal-overlay ${showMapModal ? 'active' : ''}`} onClick={() => setShowMapModal(false)}>
+                <div
+                    className="modal-content"
+                    style={{ width: '90vw', height: '90vh', maxWidth: 'none', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+                    onClick={(e) => e.stopPropagation()}
+                >
+                    <button className="modal-close-btn" onClick={() => setShowMapModal(false)} style={{ zIndex: 200, background: 'white', width: '40px', height: '40px', borderRadius: '50%', top: '20px', right: '20px' }}>
+                        <i className="fas fa-times"></i>
+                    </button>
+                    {username && (
+                        <UserReviewsMap
+                            username={username}
+                            onReviewSelect={(r) => {
+                                setShowMapModal(false); // Optionally close map modal or stack them? Stacking is better but let's just show review modal on top.
+                                // Actually, if we open review modal, the map modal is still there. 
+                                // ReviewModal uses fixed overlay. It will appear on top of map modal if z-index is higher.
+                                openModal(r);
+                            }}
+                            style={{ width: '100%', height: '100%' }}
+                        />
+                    )}
+                </div>
+            </div>
+        </div >
     )
 }

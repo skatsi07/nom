@@ -2,6 +2,9 @@ import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import LocationSearch from '../components/LocationSearch';
+import { Map, MapMarker } from '@/components/ui/map';
+import type { UnifiedLocation } from '../services/locationService';
 
 interface FoodItem {
     name: string;
@@ -11,6 +14,10 @@ interface FoodItem {
 
 interface ReviewForm {
     placeName: string;
+    address: string;
+    latitude: number | null;
+    longitude: number | null;
+    externalId: string;
     date: string;
     overallRating: number | '';
     cuisine: string;
@@ -27,6 +34,10 @@ export default function AddReview() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState<ReviewForm>({
         placeName: '',
+        address: '',
+        latitude: null,
+        longitude: null,
+        externalId: '',
         date: new Date().toISOString().split('T')[0],
         overallRating: '',
         cuisine: '',
@@ -64,6 +75,17 @@ export default function AddReview() {
 
     const removeFoodItem = (index: number) => {
         setFoodItems(foodItems.filter((_, i) => i !== index));
+    };
+
+    const handleLocationSelect = (loc: UnifiedLocation) => {
+        setFormData(prev => ({
+            ...prev,
+            // placeName: loc.name, // Don't overwrite name
+            address: loc.address,
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+            externalId: loc.externalId
+        }));
     };
 
     // Image Logic
@@ -168,9 +190,36 @@ export default function AddReview() {
                         <h3 style={{ fontSize: '1rem', borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '15px' }}>The Basics</h3>
                         <div className="form-group">
                             <label>Place Name *</label>
-                            <input name="placeName" type="text" required placeholder="e.g. Joe's Pizza"
-                                value={formData.placeName} onChange={handleChange}
+                            <input name="placeName" type="text" placeholder="e.g. Joe's Pizza" required value={formData.placeName} onChange={handleChange}
                                 style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
+                        </div>
+
+                        <div className="form-group" style={{ marginTop: '15px' }}>
+                            <label>Location</label>
+                            <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}>
+                                Search for the location to add it to your map.
+                            </p>
+                            <LocationSearch
+                                onLocationSelect={handleLocationSelect}
+                                placeholder="Search for address..."
+                            />
+
+                            {formData.latitude && formData.longitude && (
+                                <div style={{ marginTop: '10px', height: '200px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #ddd' }}>
+                                    <Map
+                                        center={[formData.longitude, formData.latitude]}
+                                        zoom={15}
+                                    >
+                                        <MapMarker
+                                            longitude={formData.longitude}
+                                            latitude={formData.latitude}
+                                        >
+                                            <div className="h-4 w-4 rounded-full border-2 border-white bg-red-500 shadow-lg" />
+                                        </MapMarker>
+                                    </Map>
+                                </div>
+                            )}
+                            {formData.address && <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>Selected: {formData.address}</p>}
                         </div>
                         <div className="form-group" style={{ marginTop: '15px' }}>
                             <label>Date Visited *</label>
@@ -211,7 +260,7 @@ export default function AddReview() {
                                     <div key={cat}>
                                         <label style={{ fontSize: '0.8rem' }}>{cat}</label>
                                         <input name={field} type="number" step="0.1" min="0" max="10" placeholder="-"
-                                            value={formData[field]} onChange={handleChange}
+                                            value={formData[field] as number | ''} onChange={handleChange}
                                             style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '8px' }} />
                                     </div>
                                 )

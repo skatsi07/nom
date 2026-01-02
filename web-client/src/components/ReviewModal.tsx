@@ -1,5 +1,7 @@
 import { useRef } from 'react';
 import { optimizeCloudinaryUrl } from '../utils/imageUtils';
+import { formatDate } from '../utils/dateUtils';
+import { Map, MapMarker } from '@/components/ui/map';
 
 // --- Interfaces ---
 // (Ideally these should be in a shared types file, but for now we mirror the shape)
@@ -31,6 +33,9 @@ export interface Review {
     ambianceScore: number;
     photos: ReviewPhoto[];
     foodItems: FoodItem[];
+    latitude?: number;
+    longitude?: number;
+    address?: string;
 }
 
 interface ReviewModalProps {
@@ -125,12 +130,35 @@ export default function ReviewModal({ review, onClose }: ReviewModalProps) {
 
                     {/* BASICS */}
                     <div className="modal-basics-section">
-                        <p className="basics-line"><strong>Date:</strong> {review.date}</p>
+                        <p className="basics-line"><strong>Date:</strong> {formatDate(review.date)}</p>
                         <p className="basics-line"><strong>Price:</strong> ${review.pricePerPerson}</p>
                         <p className="basics-line"><strong>Cuisine:</strong> {review.cuisine}</p>
 
                         {review.overallDesc && (
                             <p className="modal-description">{review.overallDesc}</p>
+                        )}
+
+                        {/* Location Map */}
+                        {review.latitude && review.longitude && (
+                            <div style={{ marginTop: '15px', height: '150px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #eee' }}>
+                                <Map
+                                    center={[review.longitude, review.latitude]}
+                                    zoom={14}
+                                >
+                                    <MapMarker
+                                        longitude={review.longitude}
+                                        latitude={review.latitude}
+                                    >
+                                        <div className="h-4 w-4 rounded-full border-2 border-white bg-red-500 shadow-lg" />
+                                    </MapMarker>
+                                </Map>
+                            </div>
+                        )}
+                        {review.address && (
+                            <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '5px' }}>
+                                <i className="fas fa-map-marker-alt" style={{ marginRight: '5px' }}></i>
+                                {review.address}
+                            </p>
                         )}
                     </div>
 

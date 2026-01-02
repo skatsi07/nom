@@ -6,6 +6,10 @@ import java.util.List;
 @Data
 public class CreateReviewRequest {
     private String placeName;
+    private String address;
+    private Double latitude;
+    private Double longitude;
+    private String externalId;
     private String date;
     private Double overallRating;
     private Float pricePerPerson;
