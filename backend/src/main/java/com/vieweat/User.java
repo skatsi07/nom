@@ -37,6 +37,8 @@ public class User {
     private String tiktokUrl;
     @Column(length = 1000)
     private String instagramUrl;
+    @Column(columnDefinition = "boolean default false")
+private boolean isPublic;
 
     // --- THE RELATIONSHIP ---
     // One User has Many Reviews.

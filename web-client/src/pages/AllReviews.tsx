@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { optimizeCloudinaryUrl } from '../utils/imageUtils'
+import ReviewModal from '../components/ReviewModal';
 
 // Interfaces (Shared)
 interface ReviewPhoto {
@@ -153,13 +154,6 @@ export default function AllReviews() {
         setSelectedReview(null);
         document.body.style.overflow = 'auto';
     }
-    const scrollCarousel = (direction: number) => {
-        const track = document.getElementById('m-carousel-track');
-        if (track) {
-            const scrollAmount = track.clientWidth * direction;
-            track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-        }
-    }
 
     // Removed Blocking Loading Screen
 
@@ -294,56 +288,7 @@ export default function AllReviews() {
 
             {/* MODAL (Reused) */}
             {selectedReview && (
-                <div id="reviewModal" className={`modal-overlay active`} onClick={closeModal}>
-                    <div className="modal-content" onClick={e => e.stopPropagation()}>
-                        <button className="modal-close-btn" onClick={closeModal}>&times;</button>
-                        <div className="modal-body">
-                            <div className="m-area-header">
-                                <div className="modal-header-row">
-                                    <h2>{selectedReview.placeName}</h2>
-                                    <div className="modal-stars-large">
-                                        {renderStars(selectedReview.overallRating)}
-                                        <span style={{ color: '#888', fontSize: '0.8rem', marginLeft: '5px' }}>({selectedReview.overallRating})</span>
-                                    </div>
-                                </div>
-                                <p className="modal-subtitle">Location Data Placeholder</p>
-                            </div>
-
-                            <div className="m-area-images carousel-container" id="photo-carousel-wrapper" style={{ display: 'block' }}>
-                                {selectedReview.photos && selectedReview.photos.length > 1 && (
-                                    <button className="carousel-btn prev" onClick={() => scrollCarousel(-1)}><i className="fas fa-chevron-left"></i></button>
-                                )}
-                                <div id="m-carousel-track" className="carousel-track">
-                                    {selectedReview.photos.sort((a, b) => a.photoOrder - b.photoOrder).map(photo => (
-                                        <img key={photo.id} src={optimizeCloudinaryUrl(photo.photoUrl, 800)} alt="Review" />
-                                    ))}
-                                </div>
-                                {selectedReview.photos && selectedReview.photos.length > 1 && (
-                                    <button className="carousel-btn next" onClick={() => scrollCarousel(1)}><i className="fas fa-chevron-right"></i></button>
-                                )}
-                            </div>
-
-                            <div className="m-area-content">
-                                <hr className="modal-divider" />
-                                <div className="modal-meta-grid">
-                                    <div className="meta-row"><strong>Date Visited:</strong> <span>{selectedReview.date}</span></div>
-                                    <div className="meta-row"><strong>Cuisine:</strong> <span>{selectedReview.cuisine}</span></div>
-                                    <div className="meta-row"><strong>Price:</strong> <span>${selectedReview.pricePerPerson}</span></div>
-                                    <div className="meta-row description-box"><strong>Description:</strong><p>{selectedReview.overallDesc}</p></div>
-                                </div>
-                                <hr className="modal-divider" />
-                                <h3>Rating Breakdown</h3>
-                                <div className="rating-breakdown">
-                                    <div className="rating-row"><span>Food</span> <div className="stars-right">{renderStars(selectedReview.foodScore)}</div></div>
-                                    <div className="rating-row"><span>Service</span> <div className="stars-right">{renderStars(selectedReview.serviceScore)}</div></div>
-                                    <div className="rating-row"><span>Ambiance</span> <div className="stars-right">{renderStars(selectedReview.ambianceScore)}</div></div>
-                                    <div className="rating-row"><span>Overall</span> <div className="stars-right">{renderStars(selectedReview.overallRating)}</div></div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <ReviewModal review={selectedReview} onClose={closeModal} />
             )}
         </div>
     )
