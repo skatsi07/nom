@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { optimizeCloudinaryUrl } from '../utils/imageUtils'
 import ReviewModal from '../components/ReviewModal';
+import UserReviewsMap from '../components/UserReviewsMap';
+import { API_BASE_URL } from '../config';
 
 // --- Interfaces for API Data ---
 interface ReviewPhoto {
@@ -67,7 +69,8 @@ export default function Profile() {
                 const headers: HeadersInit = {}
                 if (token) headers['Authorization'] = `Bearer ${token}`
 
-                const profileRes = await fetch(`/api/profile/${username}`, { headers })
+
+                const profileRes = await fetch(`${API_BASE_URL}/api/profile/${username}`, { headers })
                 if (!profileRes.ok) throw new Error("Failed to fetch profile")
                 const profileData = await profileRes.json()
                 setProfile(profileData)
@@ -93,7 +96,7 @@ export default function Profile() {
                 if (token) headers['Authorization'] = `Bearer ${token}`
 
                 // Fetch Reviews (Paginated endpoint, just get first page)
-                const reviewsRes = await fetch(`/api/reviews?username=${username}&page=0&size=9`, { headers })
+                const reviewsRes = await fetch(`${API_BASE_URL}/api/reviews?username=${username}&page=0&size=9`, { headers })
                 if (reviewsRes.ok) {
                     const pageData = await reviewsRes.json()
                     setReviews(pageData.content)

@@ -16,8 +16,15 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow Localhost Frontend
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000", "http://localhost:5174"));
+        // Allow Localhost Frontend + Production Frontend
+        String frontendUrl = System.getenv("FRONTEND_URL");
+        if (frontendUrl != null && !frontendUrl.isEmpty()) {
+            config.setAllowedOrigins(
+                    List.of("http://localhost:5173", "http://localhost:3000", "http://localhost:5174", frontendUrl));
+        } else {
+            config.setAllowedOrigins(
+                    List.of("http://localhost:5173", "http://localhost:3000", "http://localhost:5174"));
+        }
 
         // Allow Headers (Auth, Content-Type)
         config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "x-auth-token"));

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { optimizeCloudinaryUrl } from '../utils/imageUtils'
 import ReviewModal from '../components/ReviewModal';
+import { API_BASE_URL } from '../config';
 
 // Interfaces (Shared)
 interface ReviewPhoto {
@@ -79,7 +80,8 @@ export default function AllReviews() {
                 const headers: HeadersInit = {}
                 if (token) headers['Authorization'] = `Bearer ${token}`
 
-                const profileRes = await fetch(`/api/profile/${username}`, { headers })
+
+                const profileRes = await fetch(`${API_BASE_URL}/api/profile/${username}`, { headers })
                 if (profileRes.ok) setUser(await profileRes.json())
             } catch (err) {
                 console.error(err)
@@ -102,7 +104,7 @@ export default function AllReviews() {
                 if (token) headers['Authorization'] = `Bearer ${token}`
 
                 const size = 9
-                const reviewsRes = await fetch(`/api/reviews?username=${username}&page=${page}&size=${size}`, { headers })
+                const reviewsRes = await fetch(`${API_BASE_URL}/api/reviews?username=${username}&page=${page}&size=${size}`, { headers })
 
                 if (reviewsRes.ok) {
                     const pageData = await reviewsRes.json()

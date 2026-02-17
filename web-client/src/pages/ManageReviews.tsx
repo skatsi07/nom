@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { API_BASE_URL } from '../config';
 
 interface Review {
     id: number;
@@ -27,12 +28,12 @@ export default function ManageReviews() {
             const headers: HeadersInit = { 'Authorization': `Bearer ${token}` };
 
             // 1. Get My Profile to know my username
-            const meRes = await fetch(`/api/me`, { headers });
+            const meRes = await fetch(`${API_BASE_URL}/api/me`, { headers });
             if (!meRes.ok) throw new Error("Failed to fetch profile");
             const me = await meRes.json();
 
             // 2. Fetch My Reviews
-            const res = await fetch(`/api/reviews?username=${me.username}&size=100`, { headers }); // Fetch large batch for management
+            const res = await fetch(`${API_BASE_URL}/api/reviews?username=${me.username}&size=100`, { headers }); // Fetch large batch for management
             if (res.ok) {
                 const pageData = await res.json();
                 setReviews(pageData.content);
@@ -59,7 +60,8 @@ export default function ManageReviews() {
                 return;
             }
 
-            const res = await fetch(`/api/reviews/${id}`, {
+
+            const res = await fetch(`${API_BASE_URL}/api/reviews/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

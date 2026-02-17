@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { API_BASE_URL } from '../config';
 
 export default function EditProfile() {
     const navigate = useNavigate();
@@ -22,7 +23,8 @@ export default function EditProfile() {
                 const headers: HeadersInit = {}
                 if (token) headers['Authorization'] = `Bearer ${token}`
 
-                const res = await fetch(`/api/profile/${username}`, { headers });
+
+                const res = await fetch(`${API_BASE_URL}/api/profile/${username}`, { headers });
                 if (res.ok) {
                     const data = await res.json();
                     setBio(data.bio || '');
@@ -56,7 +58,7 @@ export default function EditProfile() {
                 formData.append('image', selectedFile);
             }
 
-            const res = await fetch("/api/profile", {
+            const res = await fetch(`${API_BASE_URL}/api/profile`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`

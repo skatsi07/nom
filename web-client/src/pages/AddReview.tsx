@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
+import { API_BASE_URL } from '../config';
 
 interface FoodItem {
     name: string;
@@ -128,7 +129,8 @@ export default function AddReview() {
                 body.append("images", file);
             });
 
-            const res = await fetch("/api/reviews", {
+
+            const res = await fetch(`${API_BASE_URL}/api/reviews`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`
