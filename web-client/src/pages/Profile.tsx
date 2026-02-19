@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { optimizeCloudinaryUrl } from '../utils/imageUtils'
 import ReviewModal from '../components/ReviewModal';
-import UserReviewsMap from '../components/UserReviewsMap';
+
 import { API_BASE_URL } from '../config';
 
 // --- Interfaces for API Data ---
