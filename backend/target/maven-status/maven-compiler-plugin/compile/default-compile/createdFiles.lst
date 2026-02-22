@@ -11,6 +11,7 @@ com/vieweat/User.class
 com/vieweat/dto/FoodItemDTO$FoodItemDTOBuilder.class
 com/vieweat/SupabaseJwtFilter.class
 com/vieweat/ReviewPhoto.class
+com/vieweat/HealthController.class
 com/vieweat/User$UserBuilder.class
 com/vieweat/dto/ReviewPhotoDTO$ReviewPhotoDTOBuilder.class
 com/vieweat/dto/CreateReviewRequest.class

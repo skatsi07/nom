@@ -28,7 +28,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
                         // Public endpoints (New API + Swagger)
-                        .requestMatchers("/api/profile/**", "/api/reviews/**", "/v3/api-docs/**", "/swagger-ui/**",
+                        .requestMatchers("/api/profile/**", "/api/reviews/**", "/api/health", "/v3/api-docs/**",
+                                "/swagger-ui/**",
                                 "/swagger-ui.html")
                         .permitAll()
                         // Secure everything else
