@@ -93,7 +93,7 @@ const BackendLoadingScreen: React.FC<BackendLoadingScreenProps> = ({ children })
             <div className="backend-loading-content">
                 <div className="loader-ring"></div>
                 <div className="loader-core"></div>
-                <h2 className="loader-title">Nom</h2>
+                <h2 className="loader-title">ViewEat</h2>
                 <p className="loader-message fade-in-out">{loadingMessage}</p>
             </div>
         </div>
