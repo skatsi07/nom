@@ -34,6 +34,7 @@ public class Review {
     // --- OPTIONAL FIELDS ---
     private Float pricePerPerson;
     private String cuisine;
+    private String tags;
     private String instagramUrl;
     private String tiktokUrl;
 

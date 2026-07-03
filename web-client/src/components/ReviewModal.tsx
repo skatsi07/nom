@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import { optimizeCloudinaryUrl } from '../utils/imageUtils';
+import { PREDEFINED_TAGS } from '../constants/tags';
 
 // --- Interfaces ---
 // (Ideally these should be in a shared types file, but for now we mirror the shape)
@@ -22,6 +23,7 @@ export interface Review {
     date: string;
     overallRating: number;
     cuisine: string;
+    tags: string;
     pricePerPerson: number;
     instagramUrl: string;
     tiktokUrl: string;
@@ -127,7 +129,30 @@ export default function ReviewModal({ review, onClose }: ReviewModalProps) {
                     <div className="modal-basics-section">
                         <p className="basics-line"><strong>Date:</strong> {review.date}</p>
                         <p className="basics-line"><strong>Price:</strong> ${review.pricePerPerson}</p>
-                        <p className="basics-line"><strong>Cuisine:</strong> {review.cuisine}</p>
+                        
+                        {review.tags && (
+                            <div className="basics-line" style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'center', marginTop: '5px' }}>
+                                <strong>Tags:</strong> 
+                                {review.tags.split(',').map(tag => {
+                                    const predefined = PREDEFINED_TAGS.find(t => t.label === tag);
+                                    return (
+                                        <span key={tag} style={{ 
+                                            background: '#eee', 
+                                            padding: '4px 10px', 
+                                            borderRadius: '12px', 
+                                            fontSize: '0.85rem', 
+                                            color: '#333',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '4px'
+                                        }}>
+                                            {predefined?.emoji && <span>{predefined.emoji}</span>}
+                                            {tag}
+                                        </span>
+                                    );
+                                })}
+                            </div>
+                        )}
 
                         {review.overallDesc && (
                             <p className="modal-description">{review.overallDesc}</p>

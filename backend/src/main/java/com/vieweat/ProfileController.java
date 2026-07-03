@@ -6,9 +6,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import lombok.RequiredArgsConstructor;
 
@@ -78,7 +82,8 @@ public class ProfileController {
     public ResponseEntity<Page<ReviewDTO>> getReviews(
             @RequestParam(name = "username", required = false) String username,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "9") int size) {
+            @RequestParam(name = "size", defaultValue = "9") int size,
+            @RequestParam(name = "tags", required = false) List<String> tags) {
 
         if (username == null || username.isEmpty()) {
             return ResponseEntity.badRequest().build();
@@ -88,10 +93,24 @@ public class ProfileController {
         if (user == null)
             return ResponseEntity.notFound().build();
 
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Review> reviewsPage = reviewRepository.findAllByUserOrderByDateDesc(user, pageable);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "date"));
+        
+        Specification<Review> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("user"), user));
+            
+            if (tags != null && !tags.isEmpty()) {
+                List<Predicate> tagPredicates = new ArrayList<>();
+                for (String t : tags) {
+                    tagPredicates.add(cb.like(cb.lower(root.get("tags")), "%" + t.toLowerCase() + "%"));
+                }
+                predicates.add(cb.or(tagPredicates.toArray(new Predicate[0])));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
 
-        // Convert Page<Review> to Page<ReviewDTO>
+        Page<Review> reviewsPage = reviewRepository.findAll(spec, pageable);
+
         Page<ReviewDTO> dtoPage = reviewsPage.map(this::convertToDTO);
 
         return ResponseEntity.ok(dtoPage);
@@ -312,6 +331,7 @@ public class ProfileController {
         review.setOverallRating(request.getOverallRating());
         review.setPricePerPerson(request.getPricePerPerson());
         review.setCuisine(request.getCuisine());
+        review.setTags(request.getTags());
         review.setInstagramUrl(request.getInstagramUrl());
         review.setTiktokUrl(request.getTiktokUrl());
         review.setOverallDesc(request.getOverallDesc());
@@ -327,6 +347,7 @@ public class ProfileController {
                 .date(r.getDate())
                 .overallRating(r.getOverallRating())
                 .cuisine(r.getCuisine())
+                .tags(r.getTags())
                 .pricePerPerson(r.getPricePerPerson())
                 .instagramUrl(r.getInstagramUrl())
                 .tiktokUrl(r.getTiktokUrl())

@@ -10,6 +10,7 @@ public class CreateReviewRequest {
     private Double overallRating;
     private Float pricePerPerson;
     private String cuisine;
+    private String tags;
     private String instagramUrl;
     private String tiktokUrl;
     private String overallDesc;

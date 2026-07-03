@@ -3,6 +3,7 @@ import type { ChangeEvent, FormEvent } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { API_BASE_URL } from '../config';
+import { PREDEFINED_TAGS } from '../constants/tags';
 
 interface FoodItem {
     id?: number;
@@ -22,6 +23,7 @@ interface ReviewForm {
     date: string;
     overallRating: number | '';
     cuisine: string;
+    tags: string[];
     pricePerPerson: number | '';
     overallDesc: string;
     instagramUrl: string;
@@ -41,6 +43,7 @@ export default function EditReview() {
         date: '',
         overallRating: '',
         cuisine: '',
+        tags: [],
         pricePerPerson: '',
         overallDesc: '',
         instagramUrl: '',
@@ -51,6 +54,7 @@ export default function EditReview() {
     });
 
     const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
+    const [customTagInput, setCustomTagInput] = useState('');
 
     // Photo State
     const [existingPhotos, setExistingPhotos] = useState<ExistingPhoto[]>([]);
@@ -79,7 +83,8 @@ export default function EditReview() {
                         placeName: data.placeName,
                         date: data.date,
                         overallRating: data.overallRating,
-                        cuisine: data.cuisine,
+                        cuisine: data.cuisine || '',
+                        tags: data.tags ? data.tags.split(',') : [],
                         pricePerPerson: data.pricePerPerson,
                         overallDesc: data.overallDesc,
                         instagramUrl: data.instagramUrl || '',
@@ -117,9 +122,34 @@ export default function EditReview() {
         setFoodItems(updated);
     }
     const addFoodItem = () => setFoodItems([...foodItems, { name: '', rating: '', description: '' }]);
-    const removeFoodItem = (index: number) => setFoodItems(foodItems.filter((_, i) => i !== index));
+    const removeFoodItem = (index: number) => {
+        setFoodItems(foodItems.filter((_, i) => i !== index));
+    };
 
-    // Existing Photos
+    // Tag Logic
+    const toggleTag = (tagLabel: string) => {
+        setFormData(prev => {
+            const currentTags = prev.tags || [];
+            if (currentTags.includes(tagLabel)) {
+                return { ...prev, tags: currentTags.filter(t => t !== tagLabel) };
+            } else {
+                return { ...prev, tags: [...currentTags, tagLabel] };
+            }
+        });
+    };
+
+    const handleCustomTagAdd = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const tag = customTagInput.trim();
+            if (tag && !(formData.tags || []).includes(tag)) {
+                setFormData(prev => ({ ...prev, tags: [...(prev.tags || []), tag] }));
+            }
+            setCustomTagInput('');
+        }
+    };
+
+    // Photo Handlersting Photos
     const deleteExistingPhoto = (photoId: number) => {
         setDeletedPhotoIds(prev => [...prev, photoId]);
         // Remove from view
@@ -177,6 +207,7 @@ export default function EditReview() {
 
             const dataPayload = {
                 ...formData,
+                tags: formData.tags.join(','),
                 foodItems: foodItems.filter(f => f.name.trim() !== '')
             };
 
@@ -251,15 +282,66 @@ export default function EditReview() {
                         </div>
                         <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
                             <div style={{ flex: 1 }}>
-                                <label style={{ fontSize: '0.9rem' }}>Cuisine</label>
-                                <input name="cuisine" type="text" value={formData.cuisine} onChange={handleChange}
-                                    style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
-                            </div>
-                            <div style={{ flex: 1 }}>
                                 <label style={{ fontSize: '0.9rem' }}>Price ($)</label>
                                 <input name="pricePerPerson" type="number" step="0.5" value={formData.pricePerPerson} onChange={handleChange}
                                     style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
                             </div>
+                        </div>
+
+                        {/* TAGS */}
+                        <div style={{ marginTop: '20px' }}>
+                            <label style={{ fontSize: '0.9rem', display: 'block', marginBottom: '8px' }}>Tags</label>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                                {PREDEFINED_TAGS.map(tag => {
+                                    const isSelected = formData.tags.includes(tag.label);
+                                    return (
+                                        <button 
+                                            key={tag.label} 
+                                            type="button" 
+                                            onClick={() => toggleTag(tag.label)}
+                                            style={{ 
+                                                padding: '6px 12px', 
+                                                borderRadius: '20px', 
+                                                border: isSelected ? '2px solid #000' : '1px solid #ddd',
+                                                background: isSelected ? '#eee' : '#fff',
+                                                cursor: 'pointer',
+                                                fontSize: '0.9rem',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '5px'
+                                            }}
+                                        >
+                                            {tag.emoji} {tag.label}
+                                        </button>
+                                    );
+                                })}
+                                {/* Display Custom Tags that are not in predefined list */}
+                                {formData.tags.filter(t => !PREDEFINED_TAGS.some(pt => pt.label === t)).map(tag => (
+                                     <button 
+                                        key={tag} 
+                                        type="button" 
+                                        onClick={() => toggleTag(tag)}
+                                        style={{ 
+                                            padding: '6px 12px', 
+                                            borderRadius: '20px', 
+                                            border: '2px solid #000',
+                                            background: '#eee',
+                                            cursor: 'pointer',
+                                            fontSize: '0.9rem'
+                                        }}
+                                    >
+                                        {tag} ✕
+                                    </button>
+                                ))}
+                            </div>
+                            <input 
+                                type="text" 
+                                placeholder="Add custom tag... (press Enter)"
+                                value={customTagInput}
+                                onChange={e => setCustomTagInput(e.target.value)}
+                                onKeyDown={handleCustomTagAdd}
+                                style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '0.9rem' }} 
+                            />
                         </div>
                     </div>
 

@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { optimizeCloudinaryUrl } from '../utils/imageUtils'
 import ReviewModal from '../components/ReviewModal';
+import { PREDEFINED_TAGS } from '../constants/tags';
 
 import { API_BASE_URL } from '../config';
 
@@ -218,12 +219,29 @@ export default function Profile() {
                         </div>
                     </section>
 
-                    {/* Placeholder Categories */}
+                    {/* Categories */}
                     <section className="container">
                         <h2>Explore Reviews by Category</h2>
-                        <div className="category-grid">
-                            {['🍕', '🍔', '🍜', '🍣', '🍗', '🇮🇹', '🇬🇷'].map((emoji, i) => (
-                                <div key={i} className="cat-box">{emoji}</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '15px' }}>
+                            {PREDEFINED_TAGS.map(tag => (
+                                <Link 
+                                    key={tag.label} 
+                                    to={`/profile/${username}/reviews?tags=${encodeURIComponent(tag.label)}`}
+                                    style={{
+                                        textDecoration: 'none',
+                                        padding: '10px 15px',
+                                        background: '#f9f9f9',
+                                        border: '1px solid #ddd',
+                                        borderRadius: '20px',
+                                        color: '#333',
+                                        fontWeight: '500',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '5px'
+                                    }}
+                                >
+                                    <span style={{ fontSize: '1.2rem' }}>{tag.emoji}</span> {tag.label}
+                                </Link>
                             ))}
                         </div>
                     </section>
