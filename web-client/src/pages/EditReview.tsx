@@ -255,205 +255,237 @@ export default function EditReview() {
     if (loading) return <div>Loading...</div>;
 
     return (
-        <div className="app-wrapper">
-            <header>
-                <div className="nav-buttons">
-                    <Link to="/manage-reviews" className="btn-icon" style={{ width: 'auto', fontSize: '1rem', textDecoration: 'none' }}>Cancel</Link>
-                </div>
-                <div className="logo">Edit Review</div>
-                <div style={{ width: '40px' }}></div>
-            </header>
-
-            <main className="main-content" style={{ padding: '20px' }}>
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-                    {/* BASICS */}
-                    <div style={{ background: '#fff', padding: '5px 0' }}>
-                        <h3 style={{ fontSize: '1rem', borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '15px' }}>Edit Review</h3>
-                        <div className="form-group">
-                            <label>Place Name *</label>
-                            <input name="placeName" type="text" required value={formData.placeName} onChange={handleChange}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
-                        </div>
-                        <div className="form-group" style={{ marginTop: '15px' }}>
-                            <label>Date Visited *</label>
-                            <input name="date" type="date" required value={formData.date} onChange={handleChange}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
-                        </div>
-                        <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                            <div style={{ flex: 1 }}>
-                                <label style={{ fontSize: '0.9rem' }}>Price ($)</label>
-                                <input name="pricePerPerson" type="number" step="0.5" value={formData.pricePerPerson} onChange={handleChange}
-                                    style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
-                            </div>
-                        </div>
-
-                        {/* TAGS */}
-                        <div style={{ marginTop: '20px' }}>
-                            <label style={{ fontSize: '0.9rem', display: 'block', marginBottom: '8px' }}>Tags</label>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
-                                {PREDEFINED_TAGS.map(tag => {
-                                    const isSelected = formData.tags.includes(tag.label);
-                                    return (
-                                        <button 
-                                            key={tag.label} 
-                                            type="button" 
-                                            onClick={() => toggleTag(tag.label)}
-                                            style={{ 
-                                                padding: '6px 12px', 
-                                                borderRadius: '20px', 
-                                                border: isSelected ? '2px solid #000' : '1px solid #ddd',
-                                                background: isSelected ? '#eee' : '#fff',
-                                                cursor: 'pointer',
-                                                fontSize: '0.9rem',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '5px'
-                                            }}
-                                        >
-                                            {tag.emoji} {tag.label}
-                                        </button>
-                                    );
-                                })}
-                                {/* Display Custom Tags that are not in predefined list */}
-                                {formData.tags.filter(t => !PREDEFINED_TAGS.some(pt => pt.label === t)).map(tag => (
-                                     <button 
-                                        key={tag} 
-                                        type="button" 
-                                        onClick={() => toggleTag(tag)}
-                                        style={{ 
-                                            padding: '6px 12px', 
-                                            borderRadius: '20px', 
-                                            border: '2px solid #000',
-                                            background: '#eee',
-                                            cursor: 'pointer',
-                                            fontSize: '0.9rem'
-                                        }}
-                                    >
-                                        {tag} ✕
-                                    </button>
-                                ))}
-                            </div>
-                            <input 
-                                type="text" 
-                                placeholder="Add custom tag... (press Enter)"
-                                value={customTagInput}
-                                onChange={e => setCustomTagInput(e.target.value)}
-                                onKeyDown={handleCustomTagAdd}
-                                style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '0.9rem' }} 
-                            />
-                        </div>
-                    </div>
-
-                    {/* RATINGS */}
-                    <div>
-                        <h3 style={{ fontSize: '1rem', borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '15px' }}>The Ratings</h3>
-                        <div className="form-group">
-                            <label>Overall Rating *</label>
-                            <input name="overallRating" type="number" step="0.1" min="0" max="10" required value={formData.overallRating} onChange={handleChange}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginTop: '10px' }}>
-                            {['Food', 'Service', 'Ambiance'].map(cat => {
-                                const field = (cat.toLowerCase() + 'Score') as keyof ReviewForm;
-                                return (
-                                    <div key={cat}>
-                                        <label style={{ fontSize: '0.8rem' }}>{cat}</label>
-                                        <input name={field} type="number" step="0.1" min="0" max="10" value={formData[field]} onChange={handleChange}
-                                            style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '8px' }} />
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
-
-                    {/* DETAILS */}
-                    <div>
-                        <h3 style={{ fontSize: '1rem', borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '15px' }}>Details</h3>
-                        <div className="form-group">
-                            <textarea name="overallDesc" rows={5} value={formData.overallDesc} onChange={handleChange}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontFamily: 'Inter' }}></textarea>
-                        </div>
-                        <div className="form-group" style={{ marginTop: '15px' }}>
-                            <input name="instagramUrl" type="text" placeholder="Instagram URL" value={formData.instagramUrl} onChange={handleChange}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', marginBottom: '10px' }} />
-                            <input name="tiktokUrl" type="text" placeholder="TikTok URL" value={formData.tiktokUrl} onChange={handleChange}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
-                        </div>
-                    </div>
-
-                    {/* DISHES */}
-                    <div>
-                        <h3 style={{ fontSize: '1rem', borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '15px' }}>Specific Dishes</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '15px' }}>
-                            {foodItems.map((item, idx) => (
-                                <div key={idx} className="food-item-row" style={{ background: '#f0f0f0', padding: '15px', borderRadius: '12px', border: '1px solid #ddd' }}>
-                                    <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                                        <input type="text" value={item.name} onChange={e => handleFoodChange(idx, 'name', e.target.value)}
-                                            style={{ flex: 2, padding: '10px', border: '1px solid #ddd', borderRadius: '6px' }} />
-                                        <input type="number" step="0.1" value={item.rating} onChange={e => handleFoodChange(idx, 'rating', e.target.value)}
-                                            style={{ flex: 1, padding: '10px', border: '1px solid #ddd', borderRadius: '6px' }} />
-                                    </div>
-                                    <input type="text" value={item.description} onChange={e => handleFoodChange(idx, 'description', e.target.value)}
-                                        style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '6px' }} />
-
-                                    <button type="button" onClick={() => removeFoodItem(idx)} style={{ marginTop: '5px', color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>Remove</button>
-                                </div>
-                            ))}
-                        </div>
-                        <button type="button" onClick={addFoodItem} className="btn-outline" style={{ borderStyle: 'dashed', color: '#555' }}>
-                            <i className="fas fa-plus"></i> Add New Dish
-                        </button>
-                    </div>
-
-                    {/* PHOTOS */}
-                    <div>
-                        <h3 style={{ fontSize: '1rem', borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '15px' }}>Photos</h3>
-                        <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '10px' }}>Existing Photos</p>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px' }}>
-                            {existingPhotos.map(photo => (
-                                <div key={photo.id} className={`preview-item ${coverType === 'existing' && coverIdOrIndex === photo.id ? 'selected' : ''}`}
-                                    style={{ position: 'relative', aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', border: coverType === 'existing' && coverIdOrIndex === photo.id ? '3px solid black' : '1px solid #ddd' }}
-                                    onClick={() => selectExistingCover(photo.id)}>
-                                    <img src={photo.photoUrl} alt="Review" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    {coverType === 'existing' && coverIdOrIndex === photo.id && <div className="cover-badge" style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', background: 'rgba(0,0,0,0.7)', color: 'white', fontSize: '0.7rem', textAlign: 'center', padding: '4px' }}>COVER</div>}
-                                    <div className="delete-badge" onClick={(e) => { e.stopPropagation(); deleteExistingPhoto(photo.id); }}>
-                                        <i className="fas fa-times"></i>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        <div className="form-group" style={{ marginTop: '20px' }}>
-                            <label>Add More Photos</label>
-                            <input type="file" multiple accept="image/png, image/jpeg" onChange={handleFileSelect}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', background: '#fff' }} />
-
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px', marginTop: '15px' }}>
-                                {newPreviews.map((url, idx) => (
-                                    <div key={idx} className={`preview-item ${coverType === 'new' && coverIdOrIndex === idx ? 'selected' : ''}`}
-                                        style={{ position: 'relative', aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', border: coverType === 'new' && coverIdOrIndex === idx ? '3px solid black' : '1px solid #ddd' }}
-                                        onClick={() => selectNewCover(idx)}>
-                                        <img src={url} alt="New" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        {coverType === 'new' && coverIdOrIndex === idx && <div className="cover-badge" style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', background: 'rgba(0,0,0,0.7)', color: 'white', fontSize: '0.7rem', textAlign: 'center', padding: '4px' }}>COVER</div>}
-                                        <div className="delete-badge" onClick={(e) => { e.stopPropagation(); removeNewPhoto(idx); }}>
-                                            <i className="fas fa-times"></i>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" className="btn-dark" style={{ width: '100%', padding: '15px', marginTop: '20px', fontSize: '1rem' }}>
-                        Update Review
-                    </button>
-                    <Link to="/manage-reviews" className="btn-red" style={{ width: '100%', padding: '15px', marginTop: '0px', fontSize: '1rem', justifyContent: 'center' }}>
+        <div className="min-h-screen bg-base-200 p-4 md:p-8">
+            <div className="max-w-3xl mx-auto">
+                <header className="flex items-center justify-between mb-8 bg-base-100 p-4 rounded-2xl shadow-sm">
+                    <Link to="/manage-reviews" className="btn btn-ghost btn-sm text-base-content/70">
                         Cancel
                     </Link>
-                </form>
-            </main>
+                    <h1 className="text-2xl font-bold">Edit Review</h1>
+                    <div className="w-16"></div> {/* Spacer for centering */}
+                </header>
+
+                <main>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+
+                        {/* BASICS */}
+                        <div className="card bg-base-100 shadow-xl">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg border-b border-base-200 pb-2 mb-4">Edit Review</h3>
+                                
+                                <div className="form-control w-full mb-4">
+                                    <label className="label">
+                                        <span className="label-text font-bold">Place Name *</span>
+                                    </label>
+                                    <input name="placeName" type="text" required value={formData.placeName} onChange={handleChange}
+                                        className="input input-bordered w-full" />
+                                </div>
+                                
+                                <div className="form-control w-full mb-4">
+                                    <label className="label">
+                                        <span className="label-text font-bold">Date Visited *</span>
+                                    </label>
+                                    <input name="date" type="date" required value={formData.date} onChange={handleChange}
+                                        className="input input-bordered w-full" />
+                                </div>
+                                
+                                <div className="form-control w-full md:w-1/2 mb-4">
+                                    <label className="label">
+                                        <span className="label-text font-bold">Price ($)</span>
+                                    </label>
+                                    <input name="pricePerPerson" type="number" step="0.5" value={formData.pricePerPerson} onChange={handleChange}
+                                        className="input input-bordered w-full" />
+                                </div>
+
+                                {/* TAGS */}
+                                <div className="mt-6">
+                                    <label className="label">
+                                        <span className="label-text font-bold">Tags</span>
+                                    </label>
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {PREDEFINED_TAGS.map(tag => {
+                                            const isSelected = formData.tags.includes(tag.label);
+                                            return (
+                                                <button 
+                                                    key={tag.label} 
+                                                    type="button" 
+                                                    onClick={() => toggleTag(tag.label)}
+                                                    className={`btn btn-sm rounded-full ${isSelected ? 'btn-neutral' : 'btn-outline border-base-300'}`}
+                                                >
+                                                    {tag.emoji} {tag.label}
+                                                </button>
+                                            );
+                                        })}
+                                        {/* Display Custom Tags that are not in predefined list */}
+                                        {formData.tags.filter(t => !PREDEFINED_TAGS.some(pt => pt.label === t)).map(tag => (
+                                             <button 
+                                                key={tag} 
+                                                type="button" 
+                                                onClick={() => toggleTag(tag)}
+                                                className="btn btn-sm btn-neutral rounded-full"
+                                            >
+                                                {tag} ✕
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Add custom tag... (press Enter)"
+                                        value={customTagInput}
+                                        onChange={e => setCustomTagInput(e.target.value)}
+                                        onKeyDown={handleCustomTagAdd}
+                                        className="input input-bordered input-sm w-full max-w-xs" 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* RATINGS */}
+                        <div className="card bg-base-100 shadow-xl">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg border-b border-base-200 pb-2 mb-4">The Ratings</h3>
+                                
+                                <div className="form-control w-full mb-6">
+                                    <label className="label">
+                                        <span className="label-text font-bold">Overall Rating *</span>
+                                    </label>
+                                    <input name="overallRating" type="number" step="0.1" min="0" max="10" required value={formData.overallRating} onChange={handleChange}
+                                        className="input input-bordered w-full text-xl font-bold text-primary" />
+                                </div>
+                                
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    {['Food', 'Service', 'Ambiance'].map(cat => {
+                                        const field = (cat.toLowerCase() + 'Score') as keyof ReviewForm;
+                                        return (
+                                            <div key={cat} className="form-control w-full">
+                                                <label className="label">
+                                                    <span className="label-text">{cat}</span>
+                                                </label>
+                                                <input name={field} type="number" step="0.1" min="0" max="10" value={formData[field]} onChange={handleChange}
+                                                    className="input input-bordered w-full" />
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* DETAILS */}
+                        <div className="card bg-base-100 shadow-xl">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg border-b border-base-200 pb-2 mb-4">Details</h3>
+                                
+                                <div className="form-control w-full mb-4">
+                                    <textarea name="overallDesc" rows={5} value={formData.overallDesc} onChange={handleChange} placeholder="My Review"
+                                        className="textarea textarea-bordered w-full text-base leading-relaxed"></textarea>
+                                </div>
+                                
+                                <div className="form-control w-full space-y-3 mt-4">
+                                    <input name="instagramUrl" type="url" placeholder="Instagram URL" value={formData.instagramUrl} onChange={handleChange}
+                                        className="input input-bordered w-full" />
+                                    <input name="tiktokUrl" type="url" placeholder="TikTok URL" value={formData.tiktokUrl} onChange={handleChange}
+                                        className="input input-bordered w-full" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* DISHES */}
+                        <div className="card bg-base-100 shadow-xl">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg border-b border-base-200 pb-2 mb-4 flex items-center gap-2">
+                                    Specific Dishes
+                                </h3>
+                                
+                                <div className="space-y-4 mb-4">
+                                    {foodItems.map((item, idx) => (
+                                        <div key={idx} className="bg-base-200 p-4 rounded-xl border border-base-300">
+                                            <div className="flex gap-2 mb-3">
+                                                <input type="text" value={item.name} onChange={e => handleFoodChange(idx, 'name', e.target.value)} placeholder="Dish Name"
+                                                    className="input input-bordered flex-[2]" />
+                                                <input type="number" step="0.1" value={item.rating} onChange={e => handleFoodChange(idx, 'rating', e.target.value)} placeholder="Score"
+                                                    className="input input-bordered flex-1" />
+                                            </div>
+                                            <input type="text" value={item.description} onChange={e => handleFoodChange(idx, 'description', e.target.value)} placeholder="Description"
+                                                className="input input-bordered w-full mb-3" />
+                                            <button type="button" className="btn btn-error btn-sm btn-outline" onClick={() => removeFoodItem(idx)}>
+                                                Remove
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button type="button" onClick={addFoodItem} className="btn btn-outline border-dashed w-full">
+                                    <i className="fas fa-plus mr-2"></i> Add New Dish
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* PHOTOS */}
+                        <div className="card bg-base-100 shadow-xl">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg border-b border-base-200 pb-2 mb-4">Photos</h3>
+                                
+                                <p className="text-sm font-semibold text-base-content/60 mb-2">Existing Photos</p>
+                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mb-6">
+                                    {existingPhotos.map(photo => (
+                                        <div key={photo.id} 
+                                            className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer transition-all ${coverType === 'existing' && coverIdOrIndex === photo.id ? 'ring-4 ring-primary ring-offset-2 ring-offset-base-100 shadow-lg' : 'border border-base-300 hover:opacity-90'}`}
+                                            onClick={() => selectExistingCover(photo.id)}>
+                                            <img src={photo.photoUrl} alt="Review" className="w-full h-full object-cover" />
+                                            {coverType === 'existing' && coverIdOrIndex === photo.id && (
+                                                <div className="absolute bottom-0 left-0 right-0 bg-primary/90 text-primary-content text-[10px] font-bold text-center py-1 tracking-wider uppercase backdrop-blur-sm">
+                                                    Cover
+                                                </div>
+                                            )}
+                                            <button type="button" className="btn btn-circle btn-xs absolute top-1 right-1 bg-black/50 border-none text-white hover:bg-error hover:text-error-content backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); deleteExistingPhoto(photo.id); }}>
+                                                <i className="fas fa-times text-[10px]"></i>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="form-control w-full mt-4">
+                                    <label className="label">
+                                        <span className="label-text font-bold">Add More Photos</span>
+                                    </label>
+                                    <input type="file" multiple accept="image/png, image/jpeg" onChange={handleFileSelect}
+                                        className="file-input file-input-bordered file-input-primary w-full bg-base-100" />
+                                    
+                                    {newPreviews.length > 0 && (
+                                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-4">
+                                            {newPreviews.map((url, idx) => (
+                                                <div key={idx} 
+                                                    className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer transition-all ${coverType === 'new' && coverIdOrIndex === idx ? 'ring-4 ring-primary ring-offset-2 ring-offset-base-100 shadow-lg' : 'border border-base-300 hover:opacity-90'}`}
+                                                    onClick={() => selectNewCover(idx)}>
+                                                    <img src={url} alt="New" className="w-full h-full object-cover" />
+                                                    
+                                                    {coverType === 'new' && coverIdOrIndex === idx && (
+                                                        <div className="absolute bottom-0 left-0 right-0 bg-primary/90 text-primary-content text-[10px] font-bold text-center py-1 tracking-wider uppercase backdrop-blur-sm">
+                                                            Cover
+                                                        </div>
+                                                    )}
+                                                    
+                                                    <button type="button" className="btn btn-circle btn-xs absolute top-1 right-1 bg-black/50 border-none text-white hover:bg-error hover:text-error-content backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); removeNewPhoto(idx); }}>
+                                                        <i className="fas fa-times text-[10px]"></i>
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-3 mt-6">
+                            <button type="submit" className="btn btn-primary btn-lg w-full shadow-lg">
+                                Update Review
+                            </button>
+                            <Link to="/manage-reviews" className="btn btn-outline btn-error btn-lg w-full">
+                                Cancel
+                            </Link>
+                        </div>
+                    </form>
+                </main>
+            </div>
         </div>
     )
 }

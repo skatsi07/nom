@@ -181,205 +181,243 @@ export default function AddReview() {
     };
 
     return (
-        <div className="app-wrapper">
-            <header>
-                <div className="nav-buttons">
-                    <Link to="/" className="btn-icon"><i className="fas fa-times"></i></Link>
-                </div>
-                <div className="logo">New Review</div>
-                <div style={{ width: '40px' }}></div>
-            </header>
+        <div className="min-h-screen bg-base-200 p-4 md:p-8">
+            <div className="max-w-3xl mx-auto">
+                <header className="flex items-center justify-between mb-8 bg-base-100 p-4 rounded-2xl shadow-sm">
+                    <Link to="/" className="btn btn-circle btn-ghost">
+                        <i className="fas fa-times text-xl"></i>
+                    </Link>
+                    <h1 className="text-2xl font-bold">New Review</h1>
+                    <div className="w-12"></div> {/* Spacer for centering */}
+                </header>
 
-            <main className="main-content" style={{ padding: '20px' }}>
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <main>
+                    <form onSubmit={handleSubmit} className="space-y-6">
 
-                    {/* BASICS */}
-                    <div style={{ background: '#fff', padding: '5px 0' }}>
-                        <h3 style={{ fontSize: '1rem', borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '15px' }}>The Basics</h3>
-                        <div className="form-group">
-                            <label>Place Name *</label>
-                            <input name="placeName" type="text" required placeholder="e.g. Joe's Pizza"
-                                value={formData.placeName} onChange={handleChange}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
-                        </div>
-                        <div className="form-group" style={{ marginTop: '15px' }}>
-                            <label>Date Visited *</label>
-                            <input name="date" type="date" required
-                                value={formData.date} onChange={handleChange}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
-                        </div>
-                        <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                            <div style={{ flex: 1 }}>
-                                <label style={{ fontSize: '0.9rem' }}>Price ($)</label>
-                                <input name="pricePerPerson" type="number" step="0.5" placeholder="25.00"
-                                    value={formData.pricePerPerson} onChange={handleChange}
-                                    style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
-                            </div>
-                        </div>
-
-                        {/* TAGS */}
-                        <div style={{ marginTop: '20px' }}>
-                            <label style={{ fontSize: '0.9rem', display: 'block', marginBottom: '8px' }}>Tags</label>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
-                                {PREDEFINED_TAGS.map(tag => {
-                                    const isSelected = formData.tags.includes(tag.label);
-                                    return (
-                                        <button 
-                                            key={tag.label} 
-                                            type="button" 
-                                            onClick={() => toggleTag(tag.label)}
-                                            style={{ 
-                                                padding: '6px 12px', 
-                                                borderRadius: '20px', 
-                                                border: isSelected ? '2px solid #000' : '1px solid #ddd',
-                                                background: isSelected ? '#eee' : '#fff',
-                                                cursor: 'pointer',
-                                                fontSize: '0.9rem',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '5px'
-                                            }}
-                                        >
-                                            {tag.emoji} {tag.label}
-                                        </button>
-                                    );
-                                })}
-                                {/* Display Custom Tags that are not in predefined list */}
-                                {formData.tags.filter(t => !PREDEFINED_TAGS.some(pt => pt.label === t)).map(tag => (
-                                     <button 
-                                        key={tag} 
-                                        type="button" 
-                                        onClick={() => toggleTag(tag)}
-                                        style={{ 
-                                            padding: '6px 12px', 
-                                            borderRadius: '20px', 
-                                            border: '2px solid #000',
-                                            background: '#eee',
-                                            cursor: 'pointer',
-                                            fontSize: '0.9rem'
-                                        }}
-                                    >
-                                        {tag} ✕
-                                    </button>
-                                ))}
-                            </div>
-                            <input 
-                                type="text" 
-                                placeholder="Add custom tag... (press Enter)"
-                                value={customTagInput}
-                                onChange={e => setCustomTagInput(e.target.value)}
-                                onKeyDown={handleCustomTagAdd}
-                                style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '0.9rem' }} 
-                            />
-                        </div>
-                    </div>
-
-                    {/* RATINGS */}
-                    <div>
-                        <h3 style={{ fontSize: '1rem', borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '15px' }}>The Ratings</h3>
-                        <div className="form-group">
-                            <label>Overall Rating (0.0 - 10.0) *</label>
-                            <input name="overallRating" type="number" step="0.1" min="0" max="10" required
-                                value={formData.overallRating} onChange={handleChange}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
-                        </div>
-                        <p style={{ fontSize: '0.85rem', color: '#666', margin: '15px 0 5px' }}>Category Breakdown</p>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
-                            {['Food', 'Service', 'Ambiance'].map(cat => {
-                                const field = (cat.toLowerCase() + 'Score') as keyof ReviewForm;
-                                return (
-                                    <div key={cat}>
-                                        <label style={{ fontSize: '0.8rem' }}>{cat}</label>
-                                        <input name={field} type="number" step="0.1" min="0" max="10" placeholder="-"
-                                            value={formData[field]} onChange={handleChange}
-                                            style={{ width: '100%', padding: '8px', border: '1px solid #ddd', borderRadius: '8px' }} />
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
-
-                    {/* DETAILS */}
-                    <div>
-                        <h3 style={{ fontSize: '1rem', borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '15px' }}>The Details</h3>
-                        <div className="form-group">
-                            <label>My Review</label>
-                            <textarea name="overallDesc" rows={5} placeholder="How was the experience? What stood out?"
-                                value={formData.overallDesc} onChange={handleChange}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', fontFamily: 'Inter' }}></textarea>
-                        </div>
-                        <div className="form-group" style={{ marginTop: '15px' }}>
-                            <label>Social Links (Paste URL)</label>
-                            <input name="instagramUrl" type="text" placeholder="Instagram Reel URL"
-                                value={formData.instagramUrl} onChange={handleChange}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', marginBottom: '10px' }} />
-                            <input name="tiktokUrl" type="text" placeholder="TikTok Video URL"
-                                value={formData.tiktokUrl} onChange={handleChange}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }} />
-                        </div>
-                    </div>
-
-                    {/* FOOD ITEMS */}
-                    <div>
-                        <h3 style={{ fontSize: '1rem', borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '15px' }}>Specific Dishes</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '15px' }}>
-                            {foodItems.map((item, idx) => (
-                                <div key={idx} className="food-item-row" style={{ background: '#f9f9f9', padding: '15px', borderRadius: '12px', border: '1px solid #eee', position: 'relative' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                                        <strong style={{ color: '#555' }}>Dish #{idx + 1}</strong>
-                                        <i className="fas fa-times" style={{ color: '#ccc', cursor: 'pointer' }} onClick={() => removeFoodItem(idx)}></i>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-                                        <input type="text" placeholder="Dish Name" required style={{ flex: 2, padding: '10px', border: '1px solid #ddd', borderRadius: '6px' }}
-                                            value={item.name} onChange={e => handleFoodItemChange(idx, 'name', e.target.value)} />
-                                        <input type="number" placeholder="Score" style={{ flex: 1, padding: '10px', border: '1px solid #ddd', borderRadius: '6px' }}
-                                            value={item.rating} onChange={e => handleFoodItemChange(idx, 'rating', parseFloat(e.target.value))} />
-                                    </div>
-                                    <input type="text" placeholder="Brief thoughts..." style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '6px' }}
-                                        value={item.description} onChange={e => handleFoodItemChange(idx, 'description', e.target.value)} />
+                        {/* BASICS */}
+                        <div className="card bg-base-100 shadow-xl">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg border-b border-base-200 pb-2 mb-4">The Basics</h3>
+                                
+                                <div className="form-control w-full mb-4">
+                                    <label className="label">
+                                        <span className="label-text font-bold">Place Name *</span>
+                                    </label>
+                                    <input name="placeName" type="text" required placeholder="e.g. Joe's Pizza"
+                                        value={formData.placeName} onChange={handleChange}
+                                        className="input input-bordered w-full" />
                                 </div>
-                            ))}
-                        </div>
-                        <button type="button" onClick={addFoodItem} className="btn-outline" style={{ borderStyle: 'dashed', color: '#555' }}>
-                            <i className="fas fa-plus"></i> Add a Dish
-                        </button>
-                    </div>
+                                
+                                <div className="form-control w-full mb-4">
+                                    <label className="label">
+                                        <span className="label-text font-bold">Date Visited *</span>
+                                    </label>
+                                    <input name="date" type="date" required
+                                        value={formData.date} onChange={handleChange}
+                                        className="input input-bordered w-full" />
+                                </div>
+                                
+                                <div className="form-control w-full md:w-1/2 mb-4">
+                                    <label className="label">
+                                        <span className="label-text font-bold">Price ($)</span>
+                                    </label>
+                                    <input name="pricePerPerson" type="number" step="0.5" placeholder="25.00"
+                                        value={formData.pricePerPerson} onChange={handleChange}
+                                        className="input input-bordered w-full" />
+                                </div>
 
-                    {/* PHOTOS */}
-                    <div>
-                        <h3 style={{ fontSize: '1rem', borderBottom: '1px solid #eee', paddingBottom: '10px', marginBottom: '15px' }}>Photos</h3>
-                        <div className="form-group">
-                            <label>Upload Photos</label>
-                            <input type="file" multiple accept="image/png, image/jpeg" onChange={handleFileSelect}
-                                style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px', background: '#fff' }} />
-
-                            <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '5px' }}>
-                                Select multiple files. Click an image below to set it as the <strong>Cover Photo</strong>.
-                            </p>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '10px', marginTop: '15px' }}>
-                                {imagePreviews.map((url, idx) => (
-                                    <div key={idx} className={`preview-item ${coverIndex === idx ? 'selected' : ''}`}
-                                        style={{ position: 'relative', aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer', border: coverIndex === idx ? '3px solid black' : '3px solid transparent' }}
-                                        onClick={() => setCoverIndex(idx)}>
-                                        <img src={url} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                        {coverIndex === idx && (
-                                            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', background: 'rgba(0,0,0,0.7)', color: 'white', fontSize: '0.7rem', textAlign: 'center', padding: '4px' }}>COVER</div>
-                                        )}
-                                        <div className="delete-badge" onClick={(e) => { e.stopPropagation(); removeImage(idx); }}>
-                                            <i className="fas fa-times"></i>
-                                        </div>
+                                {/* TAGS */}
+                                <div className="mt-6">
+                                    <label className="label">
+                                        <span className="label-text font-bold">Tags</span>
+                                    </label>
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {PREDEFINED_TAGS.map(tag => {
+                                            const isSelected = formData.tags.includes(tag.label);
+                                            return (
+                                                <button 
+                                                    key={tag.label} 
+                                                    type="button" 
+                                                    onClick={() => toggleTag(tag.label)}
+                                                    className={`btn btn-sm rounded-full ${isSelected ? 'btn-neutral' : 'btn-outline border-base-300'}`}
+                                                >
+                                                    {tag.emoji} {tag.label}
+                                                </button>
+                                            );
+                                        })}
+                                        {/* Display Custom Tags that are not in predefined list */}
+                                        {formData.tags.filter(t => !PREDEFINED_TAGS.some(pt => pt.label === t)).map(tag => (
+                                             <button 
+                                                key={tag} 
+                                                type="button" 
+                                                onClick={() => toggleTag(tag)}
+                                                className="btn btn-sm btn-neutral rounded-full"
+                                            >
+                                                {tag} ✕
+                                            </button>
+                                        ))}
                                     </div>
-                                ))}
+                                    <input 
+                                        type="text" 
+                                        placeholder="Add custom tag... (press Enter)"
+                                        value={customTagInput}
+                                        onChange={e => setCustomTagInput(e.target.value)}
+                                        onKeyDown={handleCustomTagAdd}
+                                        className="input input-bordered input-sm w-full max-w-xs" 
+                                    />
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <button type="submit" className="btn-dark" style={{ width: '100%', padding: '15px', marginTop: '20px', fontSize: '1rem' }}>
-                        Save Review
-                    </button>
-                </form>
-            </main>
+                        {/* RATINGS */}
+                        <div className="card bg-base-100 shadow-xl">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg border-b border-base-200 pb-2 mb-4">The Ratings</h3>
+                                
+                                <div className="form-control w-full mb-6">
+                                    <label className="label">
+                                        <span className="label-text font-bold">Overall Rating (0.0 - 10.0) *</span>
+                                    </label>
+                                    <input name="overallRating" type="number" step="0.1" min="0" max="10" required
+                                        value={formData.overallRating} onChange={handleChange}
+                                        className="input input-bordered w-full text-xl font-bold text-primary" />
+                                </div>
+                                
+                                <p className="text-sm font-semibold text-base-content/60 mb-2 uppercase tracking-wide">Category Breakdown</p>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    {['Food', 'Service', 'Ambiance'].map(cat => {
+                                        const field = (cat.toLowerCase() + 'Score') as keyof ReviewForm;
+                                        return (
+                                            <div key={cat} className="form-control w-full">
+                                                <label className="label">
+                                                    <span className="label-text">{cat}</span>
+                                                </label>
+                                                <input name={field} type="number" step="0.1" min="0" max="10" placeholder="-"
+                                                    value={formData[field]} onChange={handleChange}
+                                                    className="input input-bordered w-full" />
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* DETAILS */}
+                        <div className="card bg-base-100 shadow-xl">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg border-b border-base-200 pb-2 mb-4">The Details</h3>
+                                
+                                <div className="form-control w-full mb-4">
+                                    <label className="label">
+                                        <span className="label-text font-bold">My Review</span>
+                                    </label>
+                                    <textarea name="overallDesc" rows={5} placeholder="How was the experience? What stood out?"
+                                        value={formData.overallDesc} onChange={handleChange}
+                                        className="textarea textarea-bordered w-full text-base leading-relaxed"></textarea>
+                                </div>
+                                
+                                <div className="form-control w-full space-y-3 mt-4">
+                                    <label className="label pb-0">
+                                        <span className="label-text font-bold">Social Links</span>
+                                    </label>
+                                    <div className="relative">
+                                        <i className="fab fa-instagram absolute left-4 top-3.5 text-base-content/50"></i>
+                                        <input name="instagramUrl" type="url" placeholder="Instagram Reel URL"
+                                            value={formData.instagramUrl} onChange={handleChange}
+                                            className="input input-bordered w-full pl-10" />
+                                    </div>
+                                    <div className="relative">
+                                        <i className="fab fa-tiktok absolute left-4 top-3.5 text-base-content/50"></i>
+                                        <input name="tiktokUrl" type="url" placeholder="TikTok Video URL"
+                                            value={formData.tiktokUrl} onChange={handleChange}
+                                            className="input input-bordered w-full pl-10" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* FOOD ITEMS */}
+                        <div className="card bg-base-100 shadow-xl">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg border-b border-base-200 pb-2 mb-4 flex items-center gap-2">
+                                    <i className="fas fa-hamburger text-primary"></i> Specific Dishes
+                                </h3>
+                                
+                                <div className="space-y-4 mb-4">
+                                    {foodItems.map((item, idx) => (
+                                        <div key={idx} className="bg-base-200 p-4 rounded-xl relative border border-base-300">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <strong className="text-base-content/70">Dish #{idx + 1}</strong>
+                                                <button type="button" className="btn btn-ghost btn-xs btn-circle text-base-content/40 hover:text-error" onClick={() => removeFoodItem(idx)}>
+                                                    <i className="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                            <div className="flex gap-2 mb-3">
+                                                <input type="text" placeholder="Dish Name" required className="input input-bordered flex-[2]"
+                                                    value={item.name} onChange={e => handleFoodItemChange(idx, 'name', e.target.value)} />
+                                                <input type="number" step="0.1" min="0" max="10" placeholder="Score" className="input input-bordered flex-1"
+                                                    value={item.rating} onChange={e => handleFoodItemChange(idx, 'rating', parseFloat(e.target.value))} />
+                                            </div>
+                                            <input type="text" placeholder="Brief thoughts..." className="input input-bordered w-full"
+                                                value={item.description} onChange={e => handleFoodItemChange(idx, 'description', e.target.value)} />
+                                        </div>
+                                    ))}
+                                </div>
+                                <button type="button" onClick={addFoodItem} className="btn btn-outline border-dashed w-full">
+                                    <i className="fas fa-plus mr-2"></i> Add a Dish
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* PHOTOS */}
+                        <div className="card bg-base-100 shadow-xl">
+                            <div className="card-body">
+                                <h3 className="card-title text-lg border-b border-base-200 pb-2 mb-4">Photos</h3>
+                                
+                                <div className="form-control w-full">
+                                    <label className="label">
+                                        <span className="label-text font-bold">Upload Photos</span>
+                                    </label>
+                                    <input type="file" multiple accept="image/png, image/jpeg" onChange={handleFileSelect}
+                                        className="file-input file-input-bordered file-input-primary w-full bg-base-100" />
+                                    
+                                    <label className="label">
+                                        <span className="label-text-alt text-base-content/60">
+                                            Select multiple files. Click an image below to set it as the <strong className="text-base-content">Cover Photo</strong>.
+                                        </span>
+                                    </label>
+
+                                    {imagePreviews.length > 0 && (
+                                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 mt-4">
+                                            {imagePreviews.map((url, idx) => (
+                                                <div key={idx} 
+                                                    className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer transition-all ${coverIndex === idx ? 'ring-4 ring-primary ring-offset-2 ring-offset-base-100 shadow-lg' : 'hover:opacity-90'}`}
+                                                    onClick={() => setCoverIndex(idx)}>
+                                                    <img src={url} alt="Preview" className="w-full h-full object-cover" />
+                                                    
+                                                    {coverIndex === idx && (
+                                                        <div className="absolute bottom-0 left-0 right-0 bg-primary/90 text-primary-content text-[10px] font-bold text-center py-1 tracking-wider uppercase backdrop-blur-sm">
+                                                            Cover
+                                                        </div>
+                                                    )}
+                                                    
+                                                    <button type="button" className="btn btn-circle btn-xs absolute top-1 right-1 bg-black/50 border-none text-white hover:bg-error hover:text-error-content backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); removeImage(idx); }}>
+                                                        <i className="fas fa-times text-[10px]"></i>
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" className="btn btn-primary btn-lg w-full mt-4 shadow-lg">
+                            Save Review
+                        </button>
+                    </form>
+                </main>
+            </div>
         </div>
     )
 }

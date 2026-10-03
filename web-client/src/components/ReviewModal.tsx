@@ -68,84 +68,75 @@ export default function ReviewModal({ review, onClose }: ReviewModalProps) {
     const hasPhotos = review.photos && review.photos.length > 0;
 
     return (
-        <div className="modal-overlay active" onClick={onClose}>
-            <div className="modal-content-new-layout" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4 sm:p-6" onClick={onClose}>
+            <div className="bg-base-100 w-full max-w-5xl rounded-3xl overflow-hidden flex flex-col md:flex-row h-full max-h-[90vh] shadow-2xl relative" onClick={e => e.stopPropagation()}>
 
                 {/* CLOSE BUTTON */}
-                <button className="modal-close-btn" onClick={onClose}>&times;</button>
+                <button className="btn btn-circle btn-sm absolute right-4 top-4 z-50 bg-base-100 hover:bg-base-200 border-none text-base-content shadow-md" onClick={onClose}>✕</button>
 
                 {/* LEFT COLUMN: PHOTOS (Full Bleed) */}
-                <div className="modal-left-col">
+                <div className="w-full md:w-1/2 h-64 md:h-full relative bg-black flex-shrink-0">
                     {hasPhotos ? (
-                        <div className="modal-carousel-wrapper">
+                        <div className="w-full h-full relative overflow-hidden group">
                             {review.photos.length > 1 && (
-                                <button className="carousel-btn prev" onClick={() => scrollCarousel(-1)}>
+                                <button className="btn btn-circle btn-sm absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/50 text-white border-none opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => scrollCarousel(-1)}>
                                     <i className="fas fa-chevron-left"></i>
                                 </button>
                             )}
 
-                            <div className="modal-carousel-track" ref={carouselRef}>
+                            <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory hide-scrollbar" ref={carouselRef} style={{ scrollbarWidth: 'none' }}>
                                 {review.photos.sort((a, b) => a.photoOrder - b.photoOrder).map(photo => (
                                     <img
                                         key={photo.id}
                                         src={optimizeCloudinaryUrl(photo.photoUrl, 800)}
                                         alt="Review"
-                                        className="modal-carousel-img"
+                                        className="w-full h-full object-cover shrink-0 snap-center"
                                     />
                                 ))}
                             </div>
 
                             {review.photos.length > 1 && (
-                                <button className="carousel-btn next" onClick={() => scrollCarousel(1)}>
+                                <button className="btn btn-circle btn-sm absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/50 text-white border-none opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => scrollCarousel(1)}>
                                     <i className="fas fa-chevron-right"></i>
                                 </button>
                             )}
                         </div>
                     ) : (
-                        <div className="no-photos-placeholder">
-                            <i className="fas fa-utensils"></i>
-                            <p>No Photos Available</p>
+                        <div className="w-full h-full flex flex-col items-center justify-center text-white/50 bg-base-300">
+                            <i className="fas fa-utensils text-5xl mb-2"></i>
+                            <p className="text-lg font-medium">No Photos Available</p>
                         </div>
                     )}
                 </div>
 
                 {/* RIGHT COLUMN: CONTENT */}
-                <div className="modal-right-col">
+                <div className="w-full md:w-1/2 flex flex-col h-full overflow-y-auto p-6 md:p-8 bg-base-100 hide-scrollbar" style={{ scrollbarWidth: 'none' }}>
 
                     {/* HEADER */}
-                    <div className="modal-header-section">
-                        <h2>{review.placeName}</h2>
-                        <div className="modal-stars-row">
-                            <div className="stars-wrapper">
+                    <div className="mb-4 pr-8">
+                        <h2 className="text-3xl font-extrabold text-base-content mb-2 leading-tight">{review.placeName}</h2>
+                        <div className="flex items-center gap-2">
+                            <div className="flex text-warning text-lg">
                                 {renderStars(review.overallRating)}
                             </div>
-                            <span className="rating-num">({review.overallRating})</span>
+                            <span className="font-semibold text-base-content/70">({review.overallRating})</span>
                         </div>
                     </div>
 
-                    <hr className="modal-separator" />
+                    <div className="divider my-0"></div>
 
                     {/* BASICS */}
-                    <div className="modal-basics-section">
-                        <p className="basics-line"><strong>Date:</strong> {review.date}</p>
-                        <p className="basics-line"><strong>Price:</strong> ${review.pricePerPerson}</p>
+                    <div className="py-4 space-y-3">
+                        <p className="text-base-content/80"><strong className="text-base-content font-bold">Date:</strong> {review.date}</p>
+                        <p className="text-base-content/80"><strong className="text-base-content font-bold">Price:</strong> ${review.pricePerPerson}</p>
                         
                         {review.tags && (
-                            <div className="basics-line" style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'center', marginTop: '5px' }}>
-                                <strong>Tags:</strong> 
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
+                                <strong className="text-base-content font-bold mr-1">Tags:</strong> 
                                 {review.tags.split(',').map(tag => {
                                     const predefined = PREDEFINED_TAGS.find(t => t.label === tag);
                                     return (
-                                        <span key={tag} style={{ 
-                                            background: '#eee', 
-                                            padding: '4px 10px', 
-                                            borderRadius: '12px', 
-                                            fontSize: '0.85rem', 
-                                            color: '#333',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '4px'
-                                        }}>
+                                        <span key={tag} className="badge badge-neutral badge-md py-3 px-3 gap-1 shadow-sm font-medium">
                                             {predefined?.emoji && <span>{predefined.emoji}</span>}
                                             {tag}
                                         </span>
@@ -155,25 +146,25 @@ export default function ReviewModal({ review, onClose }: ReviewModalProps) {
                         )}
 
                         {review.overallDesc && (
-                            <p className="modal-description">{review.overallDesc}</p>
+                            <p className="mt-4 text-base-content/90 leading-relaxed bg-base-200 p-4 rounded-xl shadow-inner italic">"{review.overallDesc}"</p>
                         )}
                     </div>
 
                     {/* WHAT I ATE (Conditional) */}
                     {review.foodItems && review.foodItems.length > 0 && (
                         <>
-                            <hr className="modal-separator" />
-                            <div className="modal-food-section">
-                                <h3>What I Ate</h3>
-                                <div className="food-items-list">
+                            <div className="divider my-0"></div>
+                            <div className="py-4">
+                                <h3 className="text-xl font-bold mb-4 flex items-center gap-2"><i className="fas fa-hamburger text-primary"></i> What I Ate</h3>
+                                <div className="space-y-4">
                                     {review.foodItems.map(item => (
-                                        <div key={item.id} className="food-item-row-display">
-                                            <div className="food-name-score">
-                                                <span className="food-name">{item.name}</span>
-                                                <span className="food-score-badge">{item.rating}</span>
+                                        <div key={item.id} className="bg-base-200 p-4 rounded-xl border border-base-300">
+                                            <div className="flex justify-between items-start mb-1">
+                                                <span className="font-bold text-lg">{item.name}</span>
+                                                <span className="badge badge-primary font-bold shadow-sm">{item.rating}/10</span>
                                             </div>
                                             {item.description && (
-                                                <p className="food-desc">{item.description}</p>
+                                                <p className="text-sm text-base-content/70 mt-2">{item.description}</p>
                                             )}
                                         </div>
                                     ))}
@@ -183,50 +174,49 @@ export default function ReviewModal({ review, onClose }: ReviewModalProps) {
                     )}
 
                     {/* BREAKDOWN & SOCIALS */}
-                    <div className="modal-footer-section">
+                    <div className="mt-auto pt-4">
 
-                        {/* Only show separator if we have ratings or socials coming up */}
                         {(review.foodScore > 0 || review.serviceScore > 0 || review.ambianceScore > 0 || review.instagramUrl || review.tiktokUrl) && (
-                            <hr className="modal-separator" />
+                            <div className="divider my-0 mb-4"></div>
                         )}
 
-                        {/* Rating Breakdown checking specifically for > 0 assuming 0 or null means missing */}
                         {(review.foodScore > 0 || review.serviceScore > 0 || review.ambianceScore > 0) && (
-                            <div className="rating-bars-container">
+                            <div className="space-y-3 mb-6 bg-base-200 p-5 rounded-xl border border-base-300">
+                                <h4 className="font-bold text-sm text-base-content/50 uppercase tracking-wider mb-3">Scores</h4>
                                 {review.foodScore > 0 && (
-                                    <div className="rating-bar-row">
-                                        <span className="label">Food</span>
-                                        <div className="bar-bg"><div className="bar-fill" style={{ width: `${(review.foodScore / 10) * 100}%` }}></div></div>
-                                        <span className="score">{review.foodScore}</span>
+                                    <div className="flex items-center gap-3">
+                                        <span className="w-20 font-semibold text-sm">Food</span>
+                                        <progress className="progress progress-primary w-full bg-base-300 h-2" value={review.foodScore} max="10"></progress>
+                                        <span className="w-6 text-right font-bold">{review.foodScore}</span>
                                     </div>
                                 )}
                                 {review.serviceScore > 0 && (
-                                    <div className="rating-bar-row">
-                                        <span className="label">Service</span>
-                                        <div className="bar-bg"><div className="bar-fill" style={{ width: `${(review.serviceScore / 10) * 100}%` }}></div></div>
-                                        <span className="score">{review.serviceScore}</span>
+                                    <div className="flex items-center gap-3">
+                                        <span className="w-20 font-semibold text-sm">Service</span>
+                                        <progress className="progress progress-secondary w-full bg-base-300 h-2" value={review.serviceScore} max="10"></progress>
+                                        <span className="w-6 text-right font-bold">{review.serviceScore}</span>
                                     </div>
                                 )}
                                 {review.ambianceScore > 0 && (
-                                    <div className="rating-bar-row">
-                                        <span className="label">Ambiance</span>
-                                        <div className="bar-bg"><div className="bar-fill" style={{ width: `${(review.ambianceScore / 10) * 100}%` }}></div></div>
-                                        <span className="score">{review.ambianceScore}</span>
+                                    <div className="flex items-center gap-3">
+                                        <span className="w-20 font-semibold text-sm">Ambiance</span>
+                                        <progress className="progress progress-accent w-full bg-base-300 h-2" value={review.ambianceScore} max="10"></progress>
+                                        <span className="w-6 text-right font-bold">{review.ambianceScore}</span>
                                     </div>
                                 )}
                             </div>
                         )}
 
                         {(review.instagramUrl || review.tiktokUrl) && (
-                            <div className="modal-socials-row">
+                            <div className="flex gap-3 justify-center mb-2">
                                 {review.instagramUrl && (
-                                    <a href={review.instagramUrl} target="_blank" rel="noreferrer" className="social-icon instagram">
-                                        <i className="fab fa-instagram"></i>
+                                    <a href={review.instagramUrl} target="_blank" rel="noreferrer" className="btn btn-circle btn-outline hover:bg-pink-500 hover:text-white hover:border-pink-500 transition-colors">
+                                        <i className="fab fa-instagram text-xl"></i>
                                     </a>
                                 )}
                                 {review.tiktokUrl && (
-                                    <a href={review.tiktokUrl} target="_blank" rel="noreferrer" className="social-icon tiktok">
-                                        <i className="fab fa-tiktok"></i>
+                                    <a href={review.tiktokUrl} target="_blank" rel="noreferrer" className="btn btn-circle btn-outline hover:bg-black hover:text-white hover:border-black transition-colors">
+                                        <i className="fab fa-tiktok text-xl"></i>
                                     </a>
                                 )}
                             </div>

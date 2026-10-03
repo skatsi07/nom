@@ -1,1 +1,12 @@
 .env
+*.env
+*.log
+.DS_Store
+.idea/
+.vscode/
+
+# Build and dump outputs
+backend/target/
+backend/dump.sql
+web-client/dist/
+web-client/node_modules/

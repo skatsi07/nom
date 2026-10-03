@@ -26,33 +26,46 @@ export default function Login() {
     }
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <div className="p-8 bg-white rounded shadow-md w-96">
-                <h1 className="text-2xl font-bold mb-4 text-center">ViewEat Login</h1>
-                <form onSubmit={handleLogin} className="flex flex-col gap-4">
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        className="p-2 border rounded"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        className="p-2 border rounded"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
-                    >
-                        {loading ? 'Loading...' : 'Sign In'}
-                    </button>
-                    {/* Sign Up disabled for single-user mode */}
-                </form>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-base-200">
+            <div className="card w-96 bg-base-100 shadow-xl">
+                <div className="card-body">
+                    <h2 className="card-title justify-center mb-4 text-2xl">ViewEat Login</h2>
+                    <form onSubmit={handleLogin} className="flex flex-col gap-4">
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text">Email</span>
+                            </label>
+                            <input
+                                type="email"
+                                placeholder="email@example.com"
+                                className="input input-bordered w-full"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                        </div>
+                        <div className="form-control">
+                            <label className="label">
+                                <span className="label-text">Password</span>
+                            </label>
+                            <input
+                                type="password"
+                                placeholder="password"
+                                className="input input-bordered w-full"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+                        <div className="form-control mt-4">
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="btn btn-primary w-full"
+                            >
+                                {loading ? <span className="loading loading-spinner"></span> : 'Sign In'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     )

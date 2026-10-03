@@ -17,10 +17,12 @@ import org.springframework.data.domain.Sort;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @RestController
 @RequestMapping("/api")
@@ -83,7 +85,9 @@ public class ProfileController {
             @RequestParam(name = "username", required = false) String username,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "9") int size,
-            @RequestParam(name = "tags", required = false) List<String> tags) {
+            @RequestParam(name = "tags", required = false) List<String> tags,
+            @RequestParam(name = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(name = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
         if (username == null || username.isEmpty()) {
             return ResponseEntity.badRequest().build();
@@ -106,6 +110,14 @@ public class ProfileController {
                 }
                 predicates.add(cb.or(tagPredicates.toArray(new Predicate[0])));
             }
+            
+            if (startDate != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("date"), startDate.toString()));
+            }
+            if (endDate != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), endDate.toString()));
+            }
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
